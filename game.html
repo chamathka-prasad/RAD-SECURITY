@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Game</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        canvas { background: #222; display: block; margin: auto; }
+        h2 { color: white; }
+    </style>
+</head>
+<body>
+    <h1>Letter Game</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <h2 id="message">Press the correct key to catch the falling letter!</h2>
+    <h2 id="score">Score: 0</h2>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let fallingLetter = {
+            letter: letters[Math.floor(Math.random() * letters.length)],
+            x: Math.random() * (canvas.width - 50),
+            y: 0,
+            speed: 2
+        };
+        let score = 0;
+        let gameOver = false;
+        
+        function drawLetter() {
+            ctx.fillStyle = "white";
+            ctx.font = "40px Arial";
+            ctx.fillText(fallingLetter.letter, fallingLetter.x, fallingLetter.y);
+        }
+        
+        function update() {
+            if (gameOver) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            fallingLetter.y += fallingLetter.speed;
+            if (fallingLetter.y > canvas.height) {
+                gameOver = true;
+                document.getElementById("message").innerText = "Game Over! Final Score: " + score;
+                return;
+            }
+            drawLetter();
+            requestAnimationFrame(update);
+        }
+        
+        function resetLetter() {
+            fallingLetter.letter = letters[Math.floor(Math.random() * letters.length)];
+            fallingLetter.x = Math.random() * (canvas.width - 50);
+            fallingLetter.y = 0;
+            fallingLetter.speed += 0.2; // Increase speed gradually
+        }
+        
+        document.addEventListener("keydown", (event) => {
+            if (gameOver) return;
+            if (event.key.toUpperCase() === fallingLetter.letter) {
+                score++;
+                document.getElementById("score").innerText = `Score: ${score}`;
+                document.getElementById("message").innerText = "Correct!";
+                resetLetter();
+            }
+        });
+        
+        update();
+    </script>
+</body>
+</html>
