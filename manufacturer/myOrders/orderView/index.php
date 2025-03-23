@@ -559,7 +559,7 @@ if (isset($_SESSION["rb_manu"])) {
                   </div>
                 </div>
 
-                
+
                 <!-- before Upload -->
                 <?php
 
@@ -584,21 +584,97 @@ if (isset($_SESSION["rb_manu"])) {
                         <div class="card-body">
                           <div class="row">
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-3">
                               <span><?php echo $manuOrderDetails["name"] ?></span> <br>
                               <button class="btn btn-info" onclick="downloadFile('<?php echo '../../../resources/orders/' . $manuOrderDetails['path'] ?>', '<?php echo $manuOrderDetails['name'] . $manuOrderDetails['path'] ?>')">Download Order</button>
 
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-3">
                               <span>Quotation Submit Date :<?php echo $quotation["datetime"] ?></span> <br>
                               <button class="btn btn-info" onclick="downloadFile('<?php echo '../../../resources/quotations/' . $quotation['path'] ?>', '<?php echo 'quotation' . $manuOrderDetails['name'] . $quotation['path'] ?>')">Download Your Quotation</button>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-3">
 
                               <h4 class="card-title">Order Status</h4>
                               <span><?php echo $manuOrderDetails["status"] ?></span>
+                            </div>
+
+                            <div class="col-12 col-md-3">
+
+                              <h4 class="card-title">Change Status</h4>
+                              <select name="" id="statusChange" class="form-select ">
+                                <option value="0">Select</option>
+                                <option value="INITIAL GERBER">INITIAL GERBER</option>
+                                <option value="ENGINEER QUESTION">ENGINEER QUESTION</option>
+                                <option value="PROCESSED GERBER">PROCESSED GERBER</option>
+                                <option value="MANUFACTURING">MANUFACTURING</option>
+                                <option value="DISPATCH BOARDS">DISPATCH BOARDS</option>
+                                <option value="BOARDS RECEIVE">BOARDS RECEIVE</option>
+                                <option value="BOARDS TEST">BOARDS TEST</option>
+
+                              </select>
+                              <div class="col-12 mt-2 mb-2 
+                            <?php
+                            // if ($orderDetails["status"] == "COMPLETED") {
+                            //   echo "d-none";
+                            // }
+                            ?>
+                                                          ">
+                                <span><button class="btn btn-info w-100" onclick="changeTheOrderStatus()">Submit</button></span>
+                              </div>
+
+
+                            </div>
+
+
+                            <div class="modal fade" id="stateChangeModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Order State Change Confirmation</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <h5 class="card-title mb-0">Order Details</h5>
+                                    <div class="row mt-2">
+                                      <div class="col-12">
+                                        <span><?php echo $manuOrderDetails["name"] ?></span>
+                                      </div>
+                                      <div class="col-12">
+                                        <span>Order Date : <?php echo $manuOrderDetails["datetime"] ?></span>
+                                      </div>
+
+
+                                      <hr>
+
+
+
+                                    </div>
+
+                                    <div class="row">
+                                      <div class="col-12 mt-2">
+                                        <span>Order Status <b><?php echo $manuOrderDetails["status"] ?></b></span>
+                                      </div>
+                                      <hr>
+                                      <div class="col-12 mt-1">
+
+                                        <input type="text" class="form-control" placeholder="select" id="statusChangeText" disabled />
+                                      </div>
+                                      <div class="col-12">
+                                        <label for="" class="form-label">Type <b class="text-danger" id="statInformText">"select"</b> to Change The Status</label>
+                                        <input type="text" class="form-control" placeholder="type" id="orderNewStatus" />
+                                      </div>
+
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" onclick="changeTheOrderStatusByModel(<?php echo $manuOrderDetails['id'] ?>)">Confirm</button>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
 
                           </div>
@@ -692,6 +768,7 @@ if (isset($_SESSION["rb_manu"])) {
                       </div>
 
                     </div>
+
                   <?php
                   }
                   ?>
@@ -1395,6 +1472,88 @@ ${iconSVG}<div>${element.message}</div>
           });
 
       }
+
+
+      function changeTheOrderStatus() {
+        var selectStatus = document.getElementById("statusChange");
+
+
+
+        if (selectStatus.value == "0") {
+
+          toastr.error(
+            "Please Select the Status",
+            "Not Selected !"
+          );
+        } else {
+          document.getElementById("statusChangeText").value = selectStatus.value;
+          document.getElementById("statInformText").innerHTML = '"' + selectStatus.value + '"';
+          $('#stateChangeModel').modal('show');
+        }
+
+      }
+
+
+      function changeTheOrderStatusByModel(id) {
+        var orderNewStatus = document.getElementById("orderNewStatus");
+        var field = document.getElementById("statusChangeText").value;
+        if (orderNewStatus.value == field) {
+
+          var formData = new FormData();
+          formData.append("orderId", id);
+          formData.append("status", field);
+
+          fetch("api/changeStatus.php", {
+              method: "POST",
+              body: formData,
+
+            })
+            .then(function(resp) {
+
+              try {
+                let response = resp.json();
+                return response;
+              } catch (error) {
+                msg.classList = "alert alert-danger";
+                msg.innerHTML = "Something wrong please try again";
+                emailField.classList = "form-control";
+                passwordField.classList = "form-control";
+              }
+
+            })
+            .then(function(value) {
+
+              if (value.type == "error") {
+                toastr.error(
+                  value.message,
+                  "Error !"
+                );
+
+
+              } else if (value.type == "success") {
+                toastr.success(value.message, "Success");
+                window.location.reload();
+
+              } else {
+                toastr.error(
+                  "Something Went Wrong Please Try Again",
+                  "Error !"
+                );
+              }
+
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        } else {
+
+          toastr.error(
+            "Please Type Correctly To Proceed",
+            "Incorrect Type !"
+          );
+        }
+      }
+
 
 
 

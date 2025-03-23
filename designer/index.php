@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "designer") {
+if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "designer" || $_SESSION["rb_user"]["type"] == "designer_head")) {
   require "../config/MySQLConnector.php";
 
   $db = new MySQLConnector();
@@ -356,12 +356,27 @@ justify-content-center
                   href="manageOrder/"
                   aria-expanded="false"><i class="me-2 mdi mdi-truck"></i><span class="hide-menu">Order Details</span></a>
               </li>
-              <li class="sidebar-item ">
-                <a
-                  class="sidebar-link waves-effect waves-dark sidebar-link"
-                  href="manageManifacturer/"
-                  aria-expanded="false"><i class="me-2 mdi mdi-account-multiple"></i><span class="hide-menu">Manage Manufacturer</span></a>
-              </li>
+
+
+              <?php
+              if ($_SESSION["rb_user"]["type"] == "designer_head") {
+              ?>
+                <li class="sidebar-item ">
+                  <a
+                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                    href="manageDesigner/"
+                    aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Designer</span></a>
+                </li>
+                <li class="sidebar-item ">
+                  <a
+                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                    href="manageManifacturer/"
+                    aria-expanded="false"><i class="me-2 mdi mdi-account-multiple"></i><span class="hide-menu">Manage Manufacturer</span></a>
+                </li>
+              <?php
+              }
+              ?>
+
 
               <li class="sidebar-item">
                 <a
@@ -531,9 +546,9 @@ justify-content-center
                     <div role="button" class="d-flex flex-row comment-row mt-0" onclick="window.location='manageOrder/orderView/?id=<?= $chatResult[$c]['order_id'] ?>'">
                       <div class="">
                         <?php
-                        $rcImage="../assets/images/users/1.jpg";
-                        if(!empty($chatResult[$c]["img"])){
-                          $rcImage="../resources/companyImg/".$chatResult[$c]["img"];
+                        $rcImage = "../assets/images/users/1.jpg";
+                        if (!empty($chatResult[$c]["img"])) {
+                          $rcImage = "../resources/companyImg/" . $chatResult[$c]["img"];
                         }
                         ?>
                         <img

@@ -16,7 +16,12 @@ if (isset($_COOKIE["password_user"])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Login Template</title>
+  <title>User Login Robotic Assistance Devices</title>
+  <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="assetss/images/logotitle.jpg" />
   <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
@@ -223,11 +228,14 @@ if (isset($_COOKIE["password_user"])) {
             } else if (value.type == "success") {
               // window.location = "userDashBoard.php";
 
-              if (value.user_type == "designer") {
+              if (value.user_type == "designer"||value.user_type == "designer_head") {
                 window.location = "./designer";
               }
-              if (value.user_type == "finance") {
+              if (value.user_type == "finance"||value.user_type == "finance_head") {
                 window.location = "./finance";
+              }
+              if (value.user_type == "admin") {
+                window.location = "./admin";
               }
             } else {
               msg.classList = "alert alert-danger";

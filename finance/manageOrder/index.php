@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance") {
+if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$_SESSION["rb_user"]["type"] == "finance_head")) {
 ?>
 
   <!DOCTYPE html>
@@ -223,6 +223,19 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance") {
                   aria-expanded="false"><i class="me-2 mdi mdi-truck"></i><span class="hide-menu">Order Details</span></a>
               </li>
 
+              <?php
+              if ($_SESSION["rb_user"]["type"] == "finance_head") {
+              ?>
+                <li class="sidebar-item ">
+                  <a
+                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                    href="../manageFinance/"
+                    aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Finance</span></a>
+                </li>
+      
+              <?php
+              }
+              ?>
 
               <li class="sidebar-item">
                 <a
@@ -299,11 +312,22 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance") {
                           class="col-sm-3 text-start control-label col-form-label">Status</label>
                         <div class="col-sm-9">
                           <select name="" class="form-select" id="ostatus" onchange="getAllOrders(0)">
+      
+
                             <option value="ALL">ALL</option>
                             <option value="NEW">NEW</option>
                             <option value="PROCESSING">PROCESSING</option>
+                            <option value="INITIAL GERBER">INITIAL GERBER</option>
+                            <option value="ENGINEER QUESTION">ENGINEER QUESTION</option>
+                            <option value="PROCESSED GERBER">PROCESSED GERBER</option>
+                            <option value="MANUFACTURING">MANUFACTURING</option>
+                            <option value="DISPATCH BOARDS">DISPATCH BOARDS</option>
+                            <option value="BOARDS RECEIVE">BOARDS RECEIVE</option>
+                            <option value="BOARDS TEST">BOARDS TEST</option>
+                            <option value="HOLD">HOLD</option>
                             <option value="CANCELED">CANCELED</option>
                             <option value="COMPLETED">COMPLETED</option>
+
                           </select>
                         </div>
                       </div>

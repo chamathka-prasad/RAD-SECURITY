@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance") {
+if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$_SESSION["rb_user"]["type"] == "finance_head")) {
 
   require "../../config/MySQLConnector.php";
 
@@ -228,7 +228,19 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance") {
                     href="../manageOrder/"
                     aria-expanded="false"><i class="me-2 mdi mdi-truck"></i><span class="hide-menu">Order Details</span></a>
                 </li>
-
+                <?php
+              if ($_SESSION["rb_user"]["type"] == "finance_head") {
+              ?>
+                <li class="sidebar-item ">
+                  <a
+                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                    href="../manageFinance/"
+                    aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Finance</span></a>
+                </li>
+      
+              <?php
+              }
+              ?>
 
                 <li class="sidebar-item">
                   <a

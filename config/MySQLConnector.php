@@ -1,9 +1,15 @@
 <?php
 class MySQLConnectionPool {
     private $host = 'localhost';
+    // private $user = 'ceylons9_robort';
+    // private $password = 'qpqIt4ghlOZV';
+    // private $dbname = 'ceylons9_robort';
+
+
     private $user = 'root';
     private $password = '12345678';
-    private $dbname = 'radsecurity';
+    private $dbname = 'radSecurity';
+
     private $pool = [];
     private $maxConnections = 10;
 

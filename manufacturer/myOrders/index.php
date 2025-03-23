@@ -397,9 +397,16 @@ if (isset($_SESSION["rb_manu"])) {
                           <select name="" class="form-select" id="ostatus" onchange="getAllOrders(0)">
                             <option value="ALL">ALL</option>
                             <option value="NEW">NEW</option>
-                            <option value="PENDING">PENDING</option>
                             <option value="PROCESSING">PROCESSING</option>
-                            <option value="LOSS">LOSS</option>
+                            <option value="INITIAL GERBER">INITIAL GERBER</option>
+                            <option value="ENGINEER QUESTION">ENGINEER QUESTION</option>
+                            <option value="PROCESSED GERBER">PROCESSED GERBER</option>
+                            <option value="MANUFACTURING">MANUFACTURING</option>
+                            <option value="DISPATCH BOARDS">DISPATCH BOARDS</option>
+                            <option value="BOARDS RECEIVE">BOARDS RECEIVE</option>
+                            <option value="BOARDS TEST">BOARDS TEST</option>
+                            <option value="HOLD">HOLD</option>
+                            <option value="CANCELED">CANCELED</option>
                             <option value="COMPLETED">COMPLETED</option>
 
                           </select>

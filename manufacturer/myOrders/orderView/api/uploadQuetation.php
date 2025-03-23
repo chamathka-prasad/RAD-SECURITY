@@ -90,7 +90,7 @@ if (isset($_SESSION["rb_manu"])) {
 
                         $sendOrder = $db->search("SELECT * FROM `order` WHERE `id`=?", 'i', [$orderDetails["order_id"]]);
                         if (count($sendOrder) > 0) {
-                            $financeSearch = $db->search("SELECT * FROM `user` WHERE `type` = ?", 's', ['finance']);
+                            $financeSearch = $db->search("SELECT * FROM `user` WHERE `type` = ?", 's', ['finance_head']);
                             if (count($financeSearch) > 0) {
                                 $body = '<!DOCTYPE html>
     <html lang="en">
