@@ -13,6 +13,15 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "designer" |
   $complete = 0;
   $cancel = 0;
 
+  $HOLD = 0;
+  $INITIALGERBER = 0;
+  $ENGINEERQUESTION = 0;
+  $PROCESSEDGERBER = 0;
+  $MANUFACTURING = 0;
+  $DISPATCHBOARDS = 0;
+  $BOARDSRECEIVE = 0;
+  $BOARDSTEST = 0;
+
   $all = count($result);
   $processingOrdersArray = array();
   if ($all != 0) {
@@ -27,6 +36,22 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "designer" |
         $complete++;
       } else if ($order["status"] == "CANCELED") {
         $cancel++;
+      }else if ($order["status"] == "HOLD") {
+        $HOLD++;
+      }else if ($order["status"] == "INITIAL GERBER") {
+        $INITIALGERBER++;
+      }else if ($order["status"] == "ENGINEER QUESTION") {
+        $ENGINEERQUESTION++;
+      }else if ($order["status"] == "PROCESSED GERBER") {
+        $PROCESSEDGERBER++;
+      }else if ($order["status"] == "MANUFACTURING") {
+        $MANUFACTURING++;
+      }else if ($order["status"] == "DISPATCH BOARDS") {
+        $DISPATCHBOARDS++;
+      }else if ($order["status"] == "BOARDS RECEIVE") {
+        $BOARDSRECEIVE++;
+      }else if ($order["status"] == "BOARDS TEST") {
+        $BOARDSTEST++;
       }
     }
   }
@@ -424,165 +449,295 @@ justify-content-center
 
 
           <div class="row">
-
-            <!-- Column -->
-            <!-- Column -->
-            <div class="col-md-6 col-lg-4 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box  bg-warning text-center">
-                  <h1 class="font-light text-white">
-                    <i class="mdi mdi-truck-delivery"></i>
-                  </h1>
-                  <h6 class="text-white">All</h6>
-                  <h3 class="text-white"><?php echo $all ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-info text-center">
-                  <h1 class="font-light text-white">
-                    <i class="me-2 mdi mdi-cart"></i>
-                  </h1>
-                  <h6 class="text-white">NEW</h6>
-                  <h3 class="text-white"><?php echo $new ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-cyan text-center">
-                  <h1 class="font-light text-white">
-                    <i class=" mdi mdi-timer-sand"></i>
-                  </h1>
-                  <h6 class="text-white">PROCESSING</h6>
-                  <h3 class="text-white"><?php echo $process ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-success text-center">
-                  <h1 class="font-light text-white">
-                    <i class="mdi mdi-checkbox-marked-circle-outline"></i>
-                  </h1>
-                  <h6 class="text-white">COMPLETED</h6>
-                  <h3 class="text-white"><?php echo $complete ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-danger text-center">
-                  <h1 class="font-light text-white">
-                    <i class="mdi mdi-delete-forever"></i>
-                  </h1>
-                  <h6 class="text-white">CANCELED</h6>
-                  <h3 class="text-white"><?php echo $cancel ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-          </div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title mb-0">Processing Orders (<?= count($processingOrdersArray) ?>)</h5>
-                </div>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Order</th>
-                      <th scope="col">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    for ($or = 0; $or < count($processingOrdersArray); $or++) {
-                      $process = $processingOrdersArray[$or];
-
-
-                      $manuGetResult = $db->search("SELECT * FROM `order_has_manifacturer` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` WHERE `order_has_manifacturer`.`order_id`=? AND `order_has_manifacturer`.`status`=?", "is", [$process["id"], "PROCESSING"]);
-                      $manuName = "";
-                      if (count($manuGetResult) > 0) {
-                        $manuName = $manuGetResult[0]["name"];
-                      }
-                    ?>
-                      <tr role="button" onclick="window.location='manageOrder/orderView/?id=<?= $manuGetResult[0]['order_id'] ?>'">
-                        <td><?= $process["name"] ?></td>
-                        <td><?= $manuName ?><br><?= $process["datetime"] ?></td>
-                      </tr>
-                    <?php
-                    }
-
-                    ?>
-
-
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="col-md-6 col-12">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title">Recent Chat</h4>
-                </div>
-                <div class="comment-widgets scrollable">
-
-
-                  <?php
-
-                  $chatResult = $db->search("SELECT chat.message,chat.datetime,chat.type,order_has_manifacturer.order_id,manifacturer.name,manifacturer.img FROM `chat` INNER JOIN `chat_room` ON `chat_room`.`id`=`chat`.`chat_room_id` INNER JOIN `order_has_manifacturer` ON `order_has_manifacturer`.`id`=`chat_room`.`order_has_manifacturer_id` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id`  WHERE  `chat`.`person`=? ORDER BY `chat`.`datetime` DESC LIMIT 5", 's', ["manufacturer"]);
-
-
-                  for ($c = 0; $c < count($chatResult); $c++) {
-                  ?>
-                    <div role="button" class="d-flex flex-row comment-row mt-0" onclick="window.location='manageOrder/orderView/?id=<?= $chatResult[$c]['order_id'] ?>'">
-                      <div class="">
-                        <?php
-                        $rcImage = "../assets/images/users/1.jpg";
-                        if (!empty($chatResult[$c]["img"])) {
-                          $rcImage = "../resources/companyImg/" . $chatResult[$c]["img"];
-                        }
-                        ?>
-                        <img
-                          src="<?= $rcImage ?>"
-                          alt="user"
-                          width="50"
-                          class="rounded-circle" />
-                      </div>
-                      <div class="comment-text w-100">
-                        <h6 class="font-medium"><?= $chatResult[$c]["name"] ?></h6>
-                        <span class="mb-3 d-block"><?php
-                                                    if ($chatResult[$c]["type"] == "file") {
-                                                      echo "Uploaded A File";
-                                                    } else {
-                                                      echo $chatResult[$c]["message"];
-                                                    }
-                                                    ?>
-                        </span>
-                        <div class="comment-footer">
-                          <span class="text-muted float-end"><?= $chatResult[$c]["datetime"] ?></span>
-
-                        </div>
-                      </div>
+            <div class="col-lg-6 col-12">
+              <div class="row">
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box  bg-warning text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-truck-delivery"></i>
+                      </h1>
+                      <h6 class="text-white">All</h6>
+                      <h3 class="text-white"><?php echo $all ?></h3>
                     </div>
-                  <?php
-
-                  }
-                  ?>
-
+                  </div>
                 </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-info text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-cart"></i>
+                      </h1>
+                      <h6 class="text-white">NEW</h6>
+                      <h3 class="text-white"><?php echo $new ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-cyan text-center">
+                      <h1 class="font-light text-white">
+                        <i class=" mdi mdi-timer-sand"></i>
+                      </h1>
+                      <h6 class="text-white">PROCESSING</h6>
+                      <h3 class="text-white"><?php echo $process ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-success text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-checkbox-marked-circle-outline"></i>
+                      </h1>
+                      <h6 class="text-white">COMPLETED</h6>
+                      <h3 class="text-white"><?php echo $complete ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-danger text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-delete-forever"></i>
+                      </h1>
+                      <h6 class="text-white">CANCELED</h6>
+                      <h3 class="text-white"><?php echo $cancel ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-dark text-center">
+                      <h1 class="font-light text-white">
+                      <i class="me-2 mdi mdi-pause"></i
+                      >
+                      </h1>
+                      <h6 class="text-white">HOLD</h6>
+                      <h3 class="text-white"><?php echo $HOLD ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-info text-center">
+                      <h1 class="font-light text-white">
+                      <i class="me-2 mdi mdi-source-commit-start"></i
+                      >
+                      </h1>
+                      <h6 class="text-white">INITIAL GERBER</h6>
+                      <h3 class="text-white"><?php echo $INITIALGERBER ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-white text-center">
+                      <h1 class="font-light text-black">
+                      <i class="me-2 mdi mdi-network-question"></i
+                      >
+                      </h1>
+                      <h6 class="text-black">ENGINEER QUESTION</h6>
+                      <h3 class="text-black"><?php echo $ENGINEERQUESTION ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-warning text-center">
+                      <h1 class="font-light text-white">
+                      <i class="me-2 mdi mdi-message-settings-variant"></i
+                      >
+                      </h1>
+                      <h6 class="text-white">PROCESSED GERBER</h6>
+                      <h3 class="text-white"><?php echo $PROCESSEDGERBER ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-primary text-center">
+                      <h1 class="font-light text-white">
+                      <i class="me-2 mdi mdi-autorenew"></i
+                      >
+                      </h1>
+                      <h6 class="text-white">MANUFACTURING</h6>
+                      <h3 class="text-white"><?php echo $MANUFACTURING ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-cyan text-center">
+                      <h1 class="font-light text-white">
+                      <i class="me-2 mdi mdi-truck-delivery"></i
+                      >
+                      </h1>
+                      <h6 class="text-white">DISPATCH BOARDS</h6>
+                      <h3 class="text-white"><?php echo $DISPATCHBOARDS ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-success text-center">
+                      <h1 class="font-light text-white">
+                      <i class="me-2 mdi mdi-home-modern"></i
+                      >
+                      </h1>
+                      <h6 class="text-white">BOARDS RECEIVE</h6>
+                      <h3 class="text-white"><?php echo $BOARDSRECEIVE ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-white text-center">
+                      <h1 class="font-light text-black">
+                      <i class="me-2 mdi mdi-test-tube"></i
+                      >
+                      </h1>
+                      <h6 class="text-black">BOARDS TEST</h6>
+                      <h3 class="text-black"><?php echo $BOARDSTEST ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
               </div>
             </div>
+            <div class="col-12 col-lg-6">
+              <div class="row">
+                <!-- <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title mb-0">Processing Orders (<?= count($processingOrdersArray) ?>)</h5>
+                    </div>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Order</th>
+                          <th scope="col">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php
+                        for ($or = 0; $or < count($processingOrdersArray); $or++) {
+                          $process = $processingOrdersArray[$or];
+
+
+                          $manuGetResult = $db->search("SELECT * FROM `order_has_manifacturer` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` WHERE `order_has_manifacturer`.`order_id`=? AND `order_has_manifacturer`.`status`=?", "is", [$process["id"], "PROCESSING"]);
+                          $manuName = "";
+                          if (count($manuGetResult) > 0) {
+                            $manuName = $manuGetResult[0]["name"];
+                          }
+                        ?>
+                          <tr role="button" onclick="window.location='manageOrder/orderView/?id=<?= $manuGetResult[0]['order_id'] ?>'">
+                            <td><?= $process["name"] ?></td>
+                            <td><?= $manuName ?><br><?= $process["datetime"] ?></td>
+                          </tr>
+                        <?php
+                        }
+
+                        ?>
+
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div> -->
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <h4 class="card-title">Recent Chat</h4>
+                    </div>
+                    <div class="comment-widgets scrollable">
+
+
+                      <?php
+
+                      $chatResult = $db->search("SELECT chat.message,chat.datetime,chat.type,order_has_manifacturer.order_id,manifacturer.name,manifacturer.img FROM `chat` INNER JOIN `chat_room` ON `chat_room`.`id`=`chat`.`chat_room_id` INNER JOIN `order_has_manifacturer` ON `order_has_manifacturer`.`id`=`chat_room`.`order_has_manifacturer_id` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id`  WHERE  `chat`.`person`=? ORDER BY `chat`.`datetime` DESC LIMIT 5", 's', ["manufacturer"]);
+
+
+                      for ($c = 0; $c < count($chatResult); $c++) {
+                      ?>
+                        <div role="button" class="d-flex flex-row comment-row mt-0" onclick="window.location='manageOrder/orderView/?id=<?= $chatResult[$c]['order_id'] ?>'">
+                          <div class="">
+                            <?php
+                            $rcImage = "../assets/images/users/1.jpg";
+                            if (!empty($chatResult[$c]["img"])) {
+                              $rcImage = "../resources/companyImg/" . $chatResult[$c]["img"];
+                            }
+                            ?>
+                            <img
+                              src="<?= $rcImage ?>"
+                              alt="user"
+                              width="50"
+                              class="rounded-circle" />
+                          </div>
+                          <div class="comment-text w-100">
+                            <h6 class="font-medium"><?= $chatResult[$c]["name"] ?></h6>
+                            <span class="mb-3 d-block"><?php
+                                                        if ($chatResult[$c]["type"] == "file") {
+                                                          echo "Uploaded A File";
+                                                        } else {
+                                                          echo $chatResult[$c]["message"];
+                                                        }
+                                                        ?>
+                            </span>
+                            <div class="comment-footer">
+                              <span class="text-muted float-end"><?= $chatResult[$c]["datetime"] ?></span>
+
+                            </div>
+                          </div>
+                        </div>
+                      <?php
+
+                      }
+                      ?>
+
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Column -->
+            <!-- Column -->
 
           </div>
+
+
           <!-- ============================================================== -->
           <!-- Sales chart -->
           <!-- ============================================================== -->

@@ -70,89 +70,97 @@ if (isset($_SESSION["rb_user"])) {
       $d->setTimezone($tz);
       $date = $d->format("Y-m-d H:i:s");
 
-      $orderAddResult = $db->iud("INSERT INTO `order`(`path`,`datetime`,`dead_line`,`name`,`status`,`note`)VALUES(?,?,?,?,?,?)", "ssssss", [$savePath, $date, $odead, $oname, 'NEW', 'New Order']);
+      $orderHistorySearch = $db->search("SELECT * FROM `order` WHERE `name`=?", 's', [$oname]);
 
-      if ($orderAddResult['affected_rows'] > 0) {
+      if (count($orderHistorySearch) == 0) {
+        $orderAddResult = $db->iud("INSERT INTO `order`(`path`,`datetime`,`dead_line`,`name`,`status`,`note`)VALUES(?,?,?,?,?,?)", "ssssss", [$savePath, $date, $odead, $oname, 'NEW', 'New Order']);
 
-
-        $orderID = $orderAddResult["last_id"];
-
-        $ohistory = $db->iud("INSERT INTO `order_history`(`date_time`,`process`,`order_id`)VALUES(?,?,?)", "ssi", [$date, "Create The Order", $orderID]);
-
-        $companyArray = explode(",", $ocomps);
+        if ($orderAddResult['affected_rows'] > 0) {
 
 
-        for ($i = 0; $i < sizeof($companyArray); $i++) {
-          $uid = uniqid() . "rad" . $i;
+          $orderID = $orderAddResult["last_id"];
+
+          $ohistory = $db->iud("INSERT INTO `order_history`(`date_time`,`process`,`order_id`)VALUES(?,?,?)", "ssi", [$date, "Create The Order", $orderID]);
+
+          $companyArray = explode(",", $ocomps);
+
+
+          for ($i = 0; $i < sizeof($companyArray); $i++) {
+            $uid = uniqid() . "rad" . $i;
 
 
 
-          $orderAddManufacturer = $db->iud("INSERT INTO `order_has_manifacturer`(`order_id`,`manifacturer_id`,`status`,`uid`)VALUES(?,?,?,?)", "iiss", [$orderID, $companyArray[$i], 'NEW', $uid]);
-          if ($orderAddManufacturer['affected_rows'] > 0) {
-            $manuResult = $db->search("SELECT * FROM `manifacturer` WHERE `id`=?", "i", [$companyArray[$i]]);
-            if (count($manuResult) > 0) {
-              $body = '<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Order Notification</title>
-</head>
-<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; padding: 20px;">
-
-  <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-    
-    <!-- Company Logo -->
-    <div style="text-align: center; margin-bottom: 20px;">
-      <img src="cid:logo_cid" alt="Robotic Assistance Devices" style="max-width: 150px;">
+            $orderAddManufacturer = $db->iud("INSERT INTO `order_has_manifacturer`(`order_id`,`manifacturer_id`,`status`,`uid`)VALUES(?,?,?,?)", "iiss", [$orderID, $companyArray[$i], 'NEW', $uid]);
+            if ($orderAddManufacturer['affected_rows'] > 0) {
+              $manuResult = $db->search("SELECT * FROM `manifacturer` WHERE `id`=?", "i", [$companyArray[$i]]);
+              if (count($manuResult) > 0) {
+                $body = '<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order Notification</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; padding: 20px;">
+  
+    <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+      
+      <!-- Company Logo -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="cid:logo_cid" alt="Robotic Assistance Devices" style="max-width: 150px;">
+      </div>
+  
+      <!-- Company Name -->
+      <div style="text-align: center; font-size: 24px; font-weight: bold; color: #2c3e50;">
+        Robotic Assistance Devices
+      </div>
+  
+      <!-- Greeting Message -->
+      <p style="font-size: 16px; margin-top: 20px;">
+        Dear Manufacturer,
+      </p>
+      <p style="font-size: 16px;">
+        You have received a new order request from Robotic Assistance Devices. Please submit your best quotation as soon as possible.
+      </p>
+  
+      <!-- Instructions -->
+      <div style="background-color: #f1f1f1; padding: 15px; margin-top: 20px; border-radius: 8px;">
+        <p style="font-size: 16px; margin: 0;">To download the quotation details, please visit our website:</p>
+        <a href="https://www.roboticassistancedevices.com" style="font-size: 16px; color: #3498db; text-decoration: none;">Visit Our Website</a>
+      </div>
+  
+      <!-- Closing Message -->
+      <p style="font-size: 16px; margin-top: 20px;">
+        Please review the details and submit your quotation at your earliest convenience.
+      </p>
+  
+      <p style="font-size: 16px;">
+        Best regards,<br>
+        The Robotic Assistance Devices Team
+      </p>
+  
     </div>
-
-    <!-- Company Name -->
-    <div style="text-align: center; font-size: 24px; font-weight: bold; color: #2c3e50;">
-      Robotic Assistance Devices
-    </div>
-
-    <!-- Greeting Message -->
-    <p style="font-size: 16px; margin-top: 20px;">
-      Dear Manufacturer,
-    </p>
-    <p style="font-size: 16px;">
-      You have received a new order request from Robotic Assistance Devices. Please submit your best quotation as soon as possible.
-    </p>
-
-    <!-- Instructions -->
-    <div style="background-color: #f1f1f1; padding: 15px; margin-top: 20px; border-radius: 8px;">
-      <p style="font-size: 16px; margin: 0;">To download the quotation details, please visit our website:</p>
-      <a href="https://www.roboticassistancedevices.com" style="font-size: 16px; color: #3498db; text-decoration: none;">Visit Our Website</a>
-    </div>
-
-    <!-- Closing Message -->
-    <p style="font-size: 16px; margin-top: 20px;">
-      Please review the details and submit your quotation at your earliest convenience.
-    </p>
-
-    <p style="font-size: 16px;">
-      Best regards,<br>
-      The Robotic Assistance Devices Team
-    </p>
-
-  </div>
-
-</body>
-</html>
-';
-              MailSender::sendMail($manuResult[0]["email"], "You have New Order From Robotic Assistance Devices", $body);
+  
+  </body>
+  </html>
+  ';
+                MailSender::sendMail($manuResult[0]["email"], "You have New Order From Robotic Assistance Devices", $body);
+              }
             }
           }
-        }
 
-        $message->type = "success";
-        $message->message = "Order Added Success";
-        move_uploaded_file($img["tmp_name"], $path);
-        echo json_encode($message);
+          $message->type = "success";
+          $message->message = "Order Added Success";
+          move_uploaded_file($img["tmp_name"], $path);
+          echo json_encode($message);
+        } else {
+          $message->type = "error";
+          $message->message = "Insert Error";
+          echo json_encode($message);
+        }
       } else {
         $message->type = "error";
-        $message->message = "Insert Error";
+        $message->message = "ORDER ALREADY CREATED";
         echo json_encode($message);
       }
     } else {

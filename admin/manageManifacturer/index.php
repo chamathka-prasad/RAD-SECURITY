@@ -21,7 +21,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "admin")) {
       name="description"
       content="Matrix Admin Lite Free Version is powerful and clean admin dashboard template, inpired from Bootstrap Framework" />
     <meta name="robots" content="noindex,nofollow" />
-    <title>Designer - Manage Manufactures</title>
+    <title>Admin - Manage Manufactures</title>
     <!-- Favicon icon -->
     <link
       rel="icon"
@@ -335,24 +335,20 @@ justify-content-center
                   href="../manageOrder/"
                   aria-expanded="false"><i class="me-2 mdi mdi-truck"></i><span class="hide-menu">Order Details</span></a>
               </li>
-              <?php
-              if ($_SESSION["rb_user"]["type"] == "designer_head") {
-              ?>
-                <li class="sidebar-item ">
-                  <a
-                    class="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="../manageDesigner/"
-                    aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Designer</span></a>
-                </li>
-                <li class="sidebar-item ">
-                  <a
-                    class="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="../manageManifacturer/"
-                    aria-expanded="false"><i class="me-2 mdi mdi-account-multiple"></i><span class="hide-menu">Manage Manufacturer</span></a>
-                </li>
-              <?php
-              }
-              ?>
+
+              <li class="sidebar-item ">
+                <a
+                  class="sidebar-link waves-effect waves-dark sidebar-link"
+                  href="../manageUser/"
+                  aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage User</span></a>
+              </li>
+              <li class="sidebar-item ">
+                <a
+                  class="sidebar-link waves-effect waves-dark sidebar-link"
+                  href="../manageManifacturer/"
+                  aria-expanded="false"><i class="me-2 mdi mdi-account-multiple"></i><span class="hide-menu">Manage Manufacturer</span></a>
+              </li>
+
               <li class="sidebar-item">
                 <a
                   class="sidebar-link waves-effect waves-dark sidebar-link"

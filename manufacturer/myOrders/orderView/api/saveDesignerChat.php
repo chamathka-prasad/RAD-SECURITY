@@ -61,7 +61,7 @@ if (isset($_SESSION["rb_manu"])) {
             $chatResult = $db->iud("INSERT INTO `chat`(`datetime`,`chat_room_id`,`type`,`message`,`is_view`,`person`)VALUES(?,?,?,?,?,?)", "sissis", [$date, $chatroom["id"], 'text', $chatText, 0, 'manufacturer']);
             if ($chatResult['affected_rows'] > 0) {
 
-                $designerSearch = $db->search("SELECT * FROM `user` WHERE `type` = ?", 's', ['designer']);
+                $designerSearch = $db->search("SELECT * FROM `user` WHERE `type` = ?", 's', ['designer_head']);
                 if (count($designerSearch) > 0) {
 
 

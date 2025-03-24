@@ -71,7 +71,7 @@ if (isset($_SESSION["rb_manu"])) {
             if ($chatResult['affected_rows'] > 0) {
 
 
-                $designerSearch = $db->search("SELECT * FROM `user` WHERE `type` = ?", 's', ['designer']);
+                $designerSearch = $db->search("SELECT * FROM `user` WHERE `type` = ?", 's', ['designer_head']);
                 if (count($designerSearch) > 0) {
 
                     $manuDetails = $db->search("SELECT manifacturer.email,order.name FROM `order_has_manifacturer` INNER JOIN  `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` INNER JOIN `order` ON `order`.`id`=`order_has_manifacturer`.`order_id` WHERE `order_has_manifacturer`.`id`=?", 'i', [$chatroom["order_has_manifacturer_id"]]);

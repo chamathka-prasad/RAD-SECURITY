@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "admin"))  {
+if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "admin")) {
 
   require "../../../config/MySQLConnector.php";
 
@@ -21,7 +21,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "admin"))  {
       name="description"
       content="Matrix Admin Lite Free Version is powerful and clean admin dashboard template, inpired from Bootstrap Framework" />
     <meta name="robots" content="noindex,nofollow" />
-    <title>Designer Order Details View </title>
+    <title>Admin Order Details View </title>
     <!-- Favicon icon -->
     <link
       rel="icon"
@@ -349,24 +349,21 @@ justify-content-center
                   aria-expanded="false"><i class="me-2 mdi mdi-truck"></i><span class="hide-menu">Order Details</span></a>
               </li>
 
-              <?php
-              if ($_SESSION["rb_user"]["type"] == "designer_head") {
-              ?>
-                <li class="sidebar-item ">
-                  <a
-                    class="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="../../manageDesigner/"
-                    aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Designer</span></a>
-                </li>
-                <li class="sidebar-item ">
-                  <a
-                    class="sidebar-link waves-effect waves-dark sidebar-link"
-                    href="../../manageManifacturer/"
-                    aria-expanded="false"><i class="me-2 mdi mdi-account-multiple"></i><span class="hide-menu">Manage Manufacturer</span></a>
-                </li>
-              <?php
-              }
-              ?>
+
+              <li class="sidebar-item ">
+                <a
+                  class="sidebar-link waves-effect waves-dark sidebar-link"
+                  href="../../manageUser/"
+                  aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage User</span></a>
+              </li>
+              <li class="sidebar-item ">
+                <a
+                  class="sidebar-link waves-effect waves-dark sidebar-link"
+                  href="../../manageManifacturer/"
+                  aria-expanded="false"><i class="me-2 mdi mdi-account-multiple"></i><span class="hide-menu">Manage Manufacturer</span></a>
+              </li>
+
+
               <li class="sidebar-item">
                 <a
                   class="sidebar-link waves-effect waves-dark sidebar-link"
@@ -741,59 +738,298 @@ justify-content-center
 
               <div class="row">
                 <div class="col-12 col-lg-6 offset-lg-3">
-                  <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title mb-0">Order History</h5>
-                      <div class="row mt-2">
-                        <div class="col-12 justify-content-between">
 
-
-                          <?php
-
-                          $oh = $db->search("SELECT * FROM `order_history` WHERE `order_id`=? ORDER BY `date_time` ASC", 'i', [$id]);
-                          for ($his = 0; $his < count($oh); $his++) {
-                          ?>
-
-                            <span><?php echo $oh[$his]["date_time"] ?></span>
-
-
-                            <span><?php echo $oh[$his]["process"] ?></span>
-
-
-
-                            <?php
-
-                            if ((count($oh) - 1) > $his) {
-                            ?>
-                              <hr>
-                          <?php
-                            }
-                          }
-                          ?>
-
-
-
-
-
-
-
-                        </div>
-
-                      </div>
-
-                    </div>
-                  </div>
                 </div>
 
-              <?php
-            } else {
-              ?>
+                <?php
+
+                $id = $_GET["id"];
+                $sql = "SELECT `order`.`id`,`order`.`status`,`order`.`name`,`order`.`dead_line`,`order`.`datetime`,`order`.`path`  FROM `order` WHERE `id`=?";
+                $result = $db->search($sql, "i", [$id]);
+
+
+                if (count($result) == 1) {
+
+                  $orderDetails = $result[0];
+                ?>
+                  <div class="row">
+                    <div class="col-12 col-lg-6">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title mb-0">Order History</h5>
+                          <div class="row mt-2">
+                            <div class="col-12 justify-content-between">
+
+
+                              <?php
+
+                              $oh = $db->search("SELECT * FROM `order_history` WHERE `order_id`=? ORDER BY `date_time` ASC", 'i', [$id]);
+                              for ($his = 0; $his < count($oh); $his++) {
+                              ?>
+
+                                <span><?php echo $oh[$his]["date_time"] ?></span>
+
+
+                                <span><?php echo $oh[$his]["process"] ?></span>
+
+
+
+                                <?php
+
+                                if ((count($oh) - 1) > $his) {
+                                ?>
+                                  <hr>
+                              <?php
+                                }
+                              }
+                              ?>
+
+
+
+
+
+
+
+                            </div>
+
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="card">
+                            <div class="card-body">
+                              <h4 class="card-title">Quotations Details</h4>
+                            </div>
+                            <div class="comment-widgets scrollable">
+                              <!-- Comment Row -->
+
+                              <?php
+
+                              $manuOrderQuery = "SELECT `order_has_manifacturer`.`id`,`manifacturer`.`name`,`manifacturer`.`img`,`order_has_manifacturer`.`status` FROM `order_has_manifacturer` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` WHERE `order_id`=?";
+                              $manuOrderResult = $db->search($manuOrderQuery, "i", [$orderDetails["id"]]);
+
+
+                              for ($i = 0; $i < count($manuOrderResult); $i++) {
+                                $manufacturer = $manuOrderResult[$i];
+
+                                $imgpath = "../../../assets/images/users/d3.jpg";
+                                if (!empty($manufacturer["img"])) {
+                                  $imgpath = "../../../resources/companyImg/" . $manufacturer["img"];
+                                }
+
+                                if ($orderDetails["status"] == "NEW") {
+                              ?>
+                                  <div class="d-flex flex-row comment-row mt-0">
+                                    <div class="p-2">
+                                      <img
+                                        src="<?php echo $imgpath ?>"
+                                        alt="user"
+                                        width="60"
+                                        height="60"
+                                        class="rounded-circle" />
+                                    </div>
+                                    <div class="comment-text w-100">
+                                      <h6 class="font-medium"><?php echo $manufacturer["name"] ?></h6>
+
+
+                                      <?php
+                                      $quotationQuery = "SELECT * FROM `quotation` WHERE `order_has_manifacturer_id`=?";
+                                      $quotationResult = $db->search($quotationQuery, "i", [$manufacturer["id"]]);
+
+                                      if (count($quotationResult) == 1) {
+                                        $manuQuotation = $quotationResult[0];
+                                      ?>
+                                        <div class="comment-footer">
+                                          <span class="text-muted float-start"><?php echo $manuQuotation["datetime"] ?></span><br>
+                                          <button
+                                            type="button"
+                                            class="btn btn-cyan btn-sm text-white mt-2" onclick="downloadFile('<?php echo '../../../resources/quotations/' . $manuQuotation['path'] ?>', '<?php echo $manufacturer['name'] . $manuQuotation['path'] ?>')">
+                                            Download Quotation
+                                          </button>
+                                          <button
+                                            type="button"
+                                            class="btn btn-success btn-sm text-white mt-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop<?php echo $manuQuotation["id"] ?>">
+                                            Select The Quotation
+                                          </button>
+
+                                        </div>
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="staticBackdrop<?php echo $manuQuotation["id"] ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                          <div class="modal-dialog">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="staticBackdropLabel">QUOTATION Selection confirmation</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <h5 class="card-title mb-0">Order Details</h5>
+                                                <div class="row mt-2">
+                                                  <div class="col-12">
+                                                    <span><?php echo $orderDetails["name"] ?></span>
+                                                  </div>
+                                                  <div class="col-12">
+                                                    <span>Order Date : <?php echo $orderDetails["datetime"] ?></span>
+                                                  </div>
+                                                  <div class="col-12">
+                                                    <span>Deadline : <?php echo $orderDetails["dead_line"] ?></span>
+                                                  </div>
+
+                                                  <hr>
+
+
+
+                                                </div>
+                                                <h5 class="card-title mb-0">Selcted Quotation Details</h5>
+                                                <div class="row">
+
+                                                  <div class="col-12">
+                                                    <div class="p-2">
+                                                      <img
+                                                        src="<?php echo $imgpath ?>"
+                                                        alt="user"
+                                                        width="60"
+                                                        height="60"
+                                                        class="" />
+                                                    </div>
+                                                  </div>
+                                                  <div class="col-12 mt-2">
+                                                    <span><?php echo $manufacturer["name"] ?></span>
+                                                  </div>
+                                                  <div class="col-12">
+                                                    <span>Quotation Submit Date <?php echo $manuQuotation["datetime"] ?></span>
+                                                  </div>
+                                                  <hr>
+                                                  <div class="col-12 mt-4">
+                                                    <label for="" class="form-label">Type <b class="text-warning">"select"</b> to Select The Quotation</label>
+                                                    <input type="text" class="form-control" placeholder="select" id="select<?php echo $manuQuotation["id"] ?>" />
+                                                  </div>
+
+                                                </div>
+                                              </div>
+                                              <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-primary" onclick="selectTheQuotation(<?php echo $orderDetails['id'] ?>,<?php echo $manufacturer['id'] ?>,<?php echo $manuQuotation['id'] ?>)">Confirm</button>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      <?php
+                                      } else {
+                                      ?>
+                                        <div class="comment-footer">
+                                          <span class="float-start-0 text-danger">Not Yet Submitted</span>
+
+                                        </div>
+                                      <?php
+                                      }
+                                      ?>
+
+                                    </div>
+                                  </div>
+                                <?php
+                                } else {
+
+                                ?>
+                                  <div class="d-flex flex-row comment-row mt-0">
+                                    <div class="p-2">
+                                      <img
+                                        src="<?php echo $imgpath ?>"
+                                        alt="user"
+                                        width="60"
+                                        height="60"
+                                        class="rounded-circle" />
+                                    </div>
+                                    <div class="comment-text w-100">
+                                      <h6 class="font-medium"><?php echo $manufacturer["name"] ?>
+
+                                      </h6>
+
+
+                                      <?php
+                                      $quotationQuery = "SELECT * FROM `quotation` WHERE `order_has_manifacturer_id`=?";
+                                      $quotationResult = $db->search($quotationQuery, "i", [$manufacturer["id"]]);
+
+                                      if (count($quotationResult) == 1) {
+                                        $manuQuotation = $quotationResult[0];
+                                      ?>
+                                        <div class="comment-footer">
+                                          <span class="text-muted float-start">Quotation Submit Date: <?php echo $manuQuotation["datetime"] ?></span><br>
+
+
+                                          <?php
+                                          if ($manufacturer['status'] == "PROCESSING" || $manufacturer['status'] == "COMPLETED") {
+                                          ?>
+                                            <h6 class="font-medium fw-bolder text-success">SELECTED</h6>
+                                          <?php
+                                          } else if ($manufacturer['status'] == "LOSS") {
+                                          ?>
+                                            <h6 class="font-medium fw-bolder text-warning">NOT SELECTED</h6>
+                                          <?php
+                                          }
+                                          ?>
+
+                                          <button
+                                            type="button"
+                                            class="btn btn-cyan btn-sm text-white" onclick="downloadFile('<?php echo '../../../resources/quotations/' . $manuQuotation['path'] ?>', '<?php echo $manufacturer['name'] . $manuQuotation['path'] ?>')">
+                                            Download Quotation
+                                          </button>
+
+
+                                        </div>
+                                        <!-- Modal -->
+
+                                      <?php
+                                      } else {
+                                      ?>
+                                        <div class="comment-footer">
+                                          <span class="float-start-0 text-danger"><?php echo $manufacturer["status"] ?></span>
+
+                                        </div>
+                                      <?php
+                                      }
+                                      ?>
+
+                                    </div>
+                                  </div>
+                                <?php
+
+                                }
+
+                                ?>
+
+                              <?php
+
+                              }
+                              ?>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                <?php
+                } else {
+                ?>
+                  <script>
+                    window.location = "../"
+                  </script>
+                <?php
+                }
+              } else {
+                ?>
                 <script>
                   window.location = "../";
                 </script>
             <?php
+              }
             }
-          }
             ?>
 
             <!-- ============================================================== -->
