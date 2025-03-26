@@ -9,11 +9,21 @@ if (isset($_SESSION["rb_manu"])) {
   $sql = "SELECT `order_has_manifacturer`.`status`,`order`.`name`,`order`.`datetime`,`order_has_manifacturer`.`id`,`order_has_manifacturer`.`uid` FROM `order` INNER JOIN `order_has_manifacturer` ON `order_has_manifacturer`.`order_id`=`order`.`id` WHERE `order_has_manifacturer`.`manifacturer_id`=? AND `order`.`status`!=?";
   $result = $db->search($sql, "is", [$manufacturerSession["id"], 'CANCELED']);
 
+
   $new = 0;
   $process = 0;
   $complete = 0;
   $cancel = 0;
-  $pending = 0;
+
+  $HOLD = 0;
+  $PENDING = 0;
+  $INITIALGERBER = 0;
+  $ENGINEERQUESTION = 0;
+  $PROCESSEDGERBER = 0;
+  $MANUFACTURING = 0;
+  $DISPATCHBOARDS = 0;
+  $BOARDSRECEIVE = 0;
+  $BOARDSTEST = 0;
 
   $all = count($result);
   $processingOrdersArray = array();
@@ -26,16 +36,34 @@ if (isset($_SESSION["rb_manu"])) {
         $new++;
       } else if ($order["status"] == "PROCESSING") {
         $process++;
-        $processingOrdersArray[] = $order;
+        
       } else if ($order["status"] == "COMPLETED") {
         $complete++;
-      } else if ($order["status"] == "LOSS") {
+      } else if ($order["status"] == "CANCELED") {
         $cancel++;
+      } else if ($order["status"] == "HOLD") {
+        $HOLD++;
+      } else if ($order["status"] == "INITIAL GERBER") {
+        $INITIALGERBER++;
+      } else if ($order["status"] == "ENGINEER QUESTION") {
+        $ENGINEERQUESTION++;
+      } else if ($order["status"] == "PROCESSED GERBER") {
+        $PROCESSEDGERBER++;
+      } else if ($order["status"] == "MANUFACTURING") {
+        $MANUFACTURING++;
+      } else if ($order["status"] == "DISPATCH BOARDS") {
+        $DISPATCHBOARDS++;
+      } else if ($order["status"] == "BOARDS RECEIVE") {
+        $BOARDSRECEIVE++;
+      } else if ($order["status"] == "BOARDS TEST") {
+        $BOARDSTEST++;
       } else if ($order["status"] == "PENDING") {
-        $pending++;
+        $processingOrdersArray[] = $order;
+        $PENDING++;
       }
     }
   }
+
 ?>
 
 
@@ -390,154 +418,196 @@ if (isset($_SESSION["rb_manu"])) {
 
           <div class="row">
 
-            <!-- Column -->
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box  bg-warning text-center">
-                  <h1 class="font-light text-white">
-                    <i class="mdi mdi-truck-delivery"></i>
-                  </h1>
-                  <h6 class="text-white">All</h6>
-                  <h3 class="text-white"><?php echo $all ?></h3>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box  bg-primary text-center">
-                  <h1 class="font-light text-white">
-                    <i class=" mdi mdi-exclamation"></i>
-                  </h1>
-                  <h6 class="text-white">Pending</h6>
-                  <h3 class="text-white"><?php echo $pending ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-info text-center">
-                  <h1 class="font-light text-white">
-                    <i class="me-2 mdi mdi-cart"></i>
-                  </h1>
-                  <h6 class="text-white">NEW</h6>
-                  <h3 class="text-white"><?php echo $new ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-cyan text-center">
-                  <h1 class="font-light text-white">
-                    <i class=" mdi mdi-timer-sand"></i>
-                  </h1>
-                  <h6 class="text-white">PROCESSING</h6>
-                  <h3 class="text-white"><?php echo $process ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-success text-center">
-                  <h1 class="font-light text-white">
-                    <i class="mdi mdi-checkbox-marked-circle-outline"></i>
-                  </h1>
-                  <h6 class="text-white">COMPLETED</h6>
-                  <h3 class="text-white"><?php echo $complete ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-            <div class="col-md-6 col-lg-2 col-xlg-3">
-              <div class="card card-hover">
-                <div class="box bg-danger text-center">
-                  <h1 class="font-light text-white">
-                    <i class="mdi mdi-delete-forever"></i>
-                  </h1>
-                  <h6 class="text-white">LOSS</h6>
-                  <h3 class="text-white"><?php echo $cancel ?></h3>
-                </div>
-              </div>
-            </div>
-            <!-- Column -->
-          </div>
 
-          <div class="row">
-            <div class="col-lg-6 col-12">
+            <div class="col-lg-4 col-12">
               <div class="row">
-                <div class="col-md-12">
-                  <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title mb-0">New Orders (<?= count($newOrderArray) ?>)</h5>
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box  bg-warning text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-truck-delivery"></i>
+                      </h1>
+                      <h6 class="text-white">All</h6>
+                      <h3 class="text-white"><?php echo $all ?></h3>
                     </div>
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Order</th>
-                          <th scope="col">Order Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        for ($or = 0; $or < count($newOrderArray); $or++) {
-                          $process = $newOrderArray[$or];
-
-
-
-                        ?>
-                          <tr role="button" onclick="window.location='myOrders/orderView/?orderNum=<?= $process['uid'] ?>'">
-                            <td><?= $process["name"] ?></td>
-                            <td><?= $process["datetime"] ?></td>
-                          </tr>
-                        <?php
-                        }
-
-                        ?>
-
-
-                      </tbody>
-                    </table>
                   </div>
                 </div>
-                <div class="col-md-12">
-                  <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title mb-0">Processing Orders (<?= count($processingOrdersArray) ?>)</h5>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-info text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-cart"></i>
+                      </h1>
+                      <h6 class="text-white">NEW</h6>
+                      <h3 class="text-white"><?php echo $new ?></h3>
                     </div>
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Order</th>
-                          <th scope="col">Order Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        for ($or = 0; $or < count($processingOrdersArray); $or++) {
-                          $process = $processingOrdersArray[$or];
-
-                        ?>
-                          <tr role="button" onclick="window.location='myOrders/orderView/?orderNum=<?= $process['uid'] ?>'">
-                            <td><?= $process["name"] ?></td>
-                            <td><?= $process["datetime"] ?></td>
-                          </tr>
-                        <?php
-                        }
-
-                        ?>
-
-
-                      </tbody>
-                    </table>
                   </div>
                 </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-cyan text-center">
+                      <h1 class="font-light text-white">
+                        <i class=" mdi mdi-timer-sand"></i>
+                      </h1>
+                      <h6 class="text-white">PROCESSING</h6>
+                      <h3 class="text-white"><?php echo $process ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-danger text-center">
+                      <h1 class="font-light text-white">
+                        <i class=" mdi mdi-timer"></i>
+                      </h1>
+                      <h6 class="text-white">PENDING</h6>
+                      <h3 class="text-white"><?php echo $PENDING ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-success text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-checkbox-marked-circle-outline"></i>
+                      </h1>
+                      <h6 class="text-white">COMPLETED</h6>
+                      <h3 class="text-white"><?php echo $complete ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-danger text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-delete-forever"></i>
+                      </h1>
+                      <h6 class="text-white">CANCELED</h6>
+                      <h3 class="text-white"><?php echo $cancel ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-dark text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-pause"></i>
+                      </h1>
+                      <h6 class="text-white">HOLD</h6>
+                      <h3 class="text-white"><?php echo $HOLD ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-info text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-source-commit-start"></i>
+                      </h1>
+                      <h6 class="text-white">INITIAL GERBER</h6>
+                      <h3 class="text-white"><?php echo $INITIALGERBER ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-white text-center">
+                      <h1 class="font-light text-black">
+                        <i class="me-2 mdi mdi-network-question"></i>
+                      </h1>
+                      <h6 class="text-black">ENGINEER QUESTION</h6>
+                      <h3 class="text-black"><?php echo $ENGINEERQUESTION ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-warning text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-message-settings-variant"></i>
+                      </h1>
+                      <h6 class="text-white">PROCESSED GERBER</h6>
+                      <h3 class="text-white"><?php echo $PROCESSEDGERBER ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-primary text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-autorenew"></i>
+                      </h1>
+                      <h6 class="text-white">MANUFACTURING</h6>
+                      <h3 class="text-white"><?php echo $MANUFACTURING ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-cyan text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-truck-delivery"></i>
+                      </h1>
+                      <h6 class="text-white">DISPATCH BOARDS</h6>
+                      <h3 class="text-white"><?php echo $DISPATCHBOARDS ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-success text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-home-modern"></i>
+                      </h1>
+                      <h6 class="text-white">BOARDS RECEIVE</h6>
+                      <h3 class="text-white"><?php echo $BOARDSRECEIVE ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-4 col-xlg-4">
+                  <div class="card card-hover">
+                    <div class="box bg-white text-center">
+                      <h1 class="font-light text-black">
+                        <i class="me-2 mdi mdi-test-tube"></i>
+                      </h1>
+                      <h6 class="text-black">BOARDS TEST</h6>
+                      <h3 class="text-black"><?php echo $BOARDSTEST ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
               </div>
             </div>
-
-            <div class="col-md-6 col-12">
+            <div class="col-12 col-lg-4">
               <div class="card">
                 <div class="card-body">
                   <h4 class="card-title">Recent Chat</h4>
@@ -584,8 +654,82 @@ if (isset($_SESSION["rb_manu"])) {
                 </div>
               </div>
             </div>
+            <div class="col-12 col-lg-4">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title mb-0">New Orders (<?= count($newOrderArray) ?>)</h5>
+                    </div>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Order</th>
+                          <th scope="col">Order Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php
+                        for ($or = 0; $or < count($newOrderArray); $or++) {
+                          $process = $newOrderArray[$or];
 
+
+
+                        ?>
+                          <tr role="button" onclick="window.location='myOrders/orderView/?orderNum=<?= $process['uid'] ?>'">
+                            <td><?= $process["name"] ?></td>
+                            <td><?= $process["datetime"] ?></td>
+                          </tr>
+                        <?php
+                        }
+
+                        ?>
+
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title mb-0">Pending Orders (<?= count($processingOrdersArray) ?>)</h5>
+                    </div>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Order</th>
+                          <th scope="col">Order Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php
+                        for ($or = 0; $or < count($processingOrdersArray); $or++) {
+                          $process = $processingOrdersArray[$or];
+
+                        ?>
+                          <tr role="button" onclick="window.location='myOrders/orderView/?orderNum=<?= $process['uid'] ?>'">
+                            <td><?= $process["name"] ?></td>
+                            <td><?= $process["datetime"] ?></td>
+                          </tr>
+                        <?php
+                        }
+
+                        ?>
+
+
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+          <!-- Column -->
+          <!-- Column -->
+
+
+          
           <!-- ============================================================== -->
           <!-- Sales chart -->
           <!-- ============================================================== -->

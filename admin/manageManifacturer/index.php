@@ -648,6 +648,13 @@ justify-content-center
               if (element.img) {
                 imgpath = "../../resources/companyImg/" + element.img;
               }
+              var act = "";
+              var deac = "";
+              if (element.status == "DEACTIVE") {
+                deac = "selected";
+              } else {
+                act = "selected"
+              }
               manuLoader.innerHTML = manuLoader.innerHTML +
                 `    <tr role="button" data-bs-toggle="modal" data-bs-target="#manuView${element.id}">
                           <th>${num}</th>
@@ -739,6 +746,21 @@ justify-content-center
                                 </div>
                               </div>
                             </div>
+                            <hr/>
+                            <div class="col-12 col-lg-6">
+                              <div class="form-group row">
+                                <label
+                                  for="lname"
+                                  class="col-sm-3 text-start control-label col-form-label">Status<span class="text-danger">&#8727;</span></label>
+                                <div class="col-sm-9" >
+                                <select class="form-select" id="status${element.id}">
+                                <option value="ACTIVE" ${act}>ACTIVE</option>
+                                <option value="DEACTIVE" ${deac}>DEACTIVE</option>
+                                </select>
+                                </div>
+                              </div>
+                            </div>
+                            <hr/>
                             <div class="col-12">
                               <div class="form-group row ">
                                 <label
@@ -888,6 +910,8 @@ justify-content-center
         var mobile = document.getElementById("umobile" + id);
         var caddress = document.getElementById("uaddress" + id);
 
+        var status = document.getElementById("status" + id);
+
 
         var cimage = document.getElementById("uimage" + id);
 
@@ -915,6 +939,7 @@ justify-content-center
           formData.append("email", email.value);
           formData.append("mobile", mobile.value);
           formData.append("caddress", caddress.value);
+          formData.append("status", status.value);
           formData.append("cimg", cimage.files[0]);
 
           fetch("api/updateManufacturer.php", {

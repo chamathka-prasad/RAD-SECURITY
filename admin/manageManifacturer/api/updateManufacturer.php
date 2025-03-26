@@ -38,6 +38,7 @@ if (isset($_SESSION["rb_user"])) {
     $email = $_POST["email"];
     $mobile = $_POST["mobile"];
     $caddress = $_POST["caddress"];
+    $status = $_POST["status"];
 
 
     $regex = '/^\+?\d+$/';
@@ -58,6 +59,10 @@ if (isset($_SESSION["rb_user"])) {
     } else if (empty($caddress)) {
         $message->type = "error";
         $message->message = "Company Address Is Empty";
+        echo json_encode($message);
+    } else if (empty($status)) {
+        $message->type = "error";
+        $message->message = "status Is Empty";
         echo json_encode($message);
     } else {
 
@@ -83,8 +88,8 @@ if (isset($_SESSION["rb_user"])) {
                     $path = "../../../resources/companyImg/" . $fileName . "." . $ext;
                     move_uploaded_file($img["tmp_name"], $path);
 
-                    $insertManifacturer = $db->iud("UPDATE `manifacturer` SET `name`=?,`address`=?,`img`=?,`email`=?,`mobile`=? WHERE `id`=?
-                ", "sssssi", [$cname, $caddress, $savePath, $email, $mobile, $id]);
+                    $insertManifacturer = $db->iud("UPDATE `manifacturer` SET `name`=?,`address`=?,`img`=?,`email`=?,`mobile`=?,`status`=? WHERE `id`=?
+                ", "ssssssi", [$cname, $caddress, $savePath, $email, $mobile, $status, $id]);
 
                     if ($insertManifacturer['affected_rows'] > 0) {
 
@@ -98,7 +103,7 @@ if (isset($_SESSION["rb_user"])) {
                         echo json_encode($message);
                     }
                 } else {
-                    $insertManifacturer = $db->iud("UPDATE `manifacturer` SET `name`=?,`address`=?,`email`=?,`mobile`=? WHERE `id`=?", "ssssi", [$cname, $caddress, $email, $mobile, $id]);
+                    $insertManifacturer = $db->iud("UPDATE `manifacturer` SET `name`=?,`address`=?,`email`=?,`mobile`=?,`status`=? WHERE `id`=?", "sssssi", [$cname, $caddress, $email, $mobile,$status, $id]);
 
                     if ($insertManifacturer['affected_rows'] > 0) {
 

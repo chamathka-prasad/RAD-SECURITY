@@ -74,8 +74,8 @@ if (isset($_SESSION["rb_user"])) {
         move_uploaded_file($img["tmp_name"], $path);
       }
       $password = uniqid();
-      $insertManifacturer = $db->iud("INSERT INTO `user`(`name`,`img`,`email`,`password`,`username`,`type`)
-            VALUES(?,?,?,?,?,?)", "ssssss", [$cname, $savePath, $email, $password, 'user' . $password, $type]);
+      $insertManifacturer = $db->iud("INSERT INTO `user`(`name`,`img`,`email`,`password`,`username`,`type`,`u_status`)
+            VALUES(?,?,?,?,?,?,?)", "sssssss", [$cname, $savePath, $email, $password, 'user' . $password, $type, 'ACTIVE']);
 
       if ($insertManifacturer['affected_rows'] > 0) {
 
@@ -104,7 +104,7 @@ if (isset($_SESSION["rb_user"])) {
       Dear User,
     </p>
     <p style="font-size: 16px;">
-      You have been successfully registered as a '.$type.' with Robotic Assistance Devices. Please use the following credentials to log in:
+      You have been successfully registered as a ' . $type . ' with Robotic Assistance Devices. Please use the following credentials to log in:
     </p>
 
     <!-- Login Details -->

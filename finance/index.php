@@ -1,12 +1,65 @@
 <?php
 session_start();
 
-if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$_SESSION["rb_user"]["type"] == "finance_head")) {
+if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance" || $_SESSION["rb_user"]["type"] == "finance_head")) {
   require "../config/MySQLConnector.php";
 
   $db = new MySQLConnector();
-  $sql = "SELECT * FROM `order` WHERE `status`=? ORDER BY `datetime` DESC";
-  $result = $db->search($sql, "s", ["NEW"]);
+  $sql = "SELECT * FROM `order` ORDER BY `datetime` DESC";
+  $result = $db->search($sql);
+
+
+
+
+  $new = 0;
+  $process = 0;
+  $complete = 0;
+  $cancel = 0;
+
+  $HOLD = 0;
+  $INITIALGERBER = 0;
+  $ENGINEERQUESTION = 0;
+  $PROCESSEDGERBER = 0;
+  $MANUFACTURING = 0;
+  $DISPATCHBOARDS = 0;
+  $BOARDSRECEIVE = 0;
+  $BOARDSTEST = 0;
+
+  $all = count($result);
+  $processingOrdersArray = array();
+  $newOrderArray = array();
+  if ($all != 0) {
+    for ($i = 0; $i < $all; $i++) {
+      $order = $result[$i];
+      if ($order["status"] == "NEW") {
+        $newOrderArray[] = $order;
+        $new++;
+      } else if ($order["status"] == "PROCESSING") {
+        $process++;
+        $processingOrdersArray[] = $order;
+      } else if ($order["status"] == "COMPLETED") {
+        $complete++;
+      } else if ($order["status"] == "CANCELED") {
+        $cancel++;
+      } else if ($order["status"] == "HOLD") {
+        $HOLD++;
+      } else if ($order["status"] == "INITIAL GERBER") {
+        $INITIALGERBER++;
+      } else if ($order["status"] == "ENGINEER QUESTION") {
+        $ENGINEERQUESTION++;
+      } else if ($order["status"] == "PROCESSED GERBER") {
+        $PROCESSEDGERBER++;
+      } else if ($order["status"] == "MANUFACTURING") {
+        $MANUFACTURING++;
+      } else if ($order["status"] == "DISPATCH BOARDS") {
+        $DISPATCHBOARDS++;
+      } else if ($order["status"] == "BOARDS RECEIVE") {
+        $BOARDSRECEIVE++;
+      } else if ($order["status"] == "BOARDS TEST") {
+        $BOARDSTEST++;
+      }
+    }
+  }
 
 ?>
 
@@ -145,7 +198,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
             <!-- ============================================================== -->
             <ul class="navbar-nav float-end">
 
-              
+
               <!-- ============================================================== -->
               <!-- End Messages -->
               <!-- ============================================================== -->
@@ -233,7 +286,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
                     href="manageFinance/"
                     aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Finance</span></a>
                 </li>
-      
+
               <?php
               }
               ?>
@@ -267,7 +320,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
           <div class="row">
             <div class="col-12 d-flex no-block align-items-center">
               <h4 class="page-title">Dashboard</h4>
-              
+
             </div>
           </div>
         </div>
@@ -283,96 +336,277 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
           <!-- ============================================================== -->
 
           <div class="row">
-            <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title mb-0">New Orders (<?= count($result) ?>)</h5>
+            <div class="col-lg-6 col-12">
+              <div class="row">
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box  bg-warning text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-truck-delivery"></i>
+                      </h1>
+                      <h6 class="text-white">All</h6>
+                      <h3 class="text-white"><?php echo $all ?></h3>
+                    </div>
+                  </div>
                 </div>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Order</th>
-                      <th scope="col">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    for ($or = 0; $or < count($result); $or++) {
-                      $process = $result[$or];
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-info text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-cart"></i>
+                      </h1>
+                      <h6 class="text-white">NEW</h6>
+                      <h3 class="text-white"><?php echo $new ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-cyan text-center">
+                      <h1 class="font-light text-white">
+                        <i class=" mdi mdi-timer-sand"></i>
+                      </h1>
+                      <h6 class="text-white">PROCESSING</h6>
+                      <h3 class="text-white"><?php echo $process ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-success text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-checkbox-marked-circle-outline"></i>
+                      </h1>
+                      <h6 class="text-white">COMPLETED</h6>
+                      <h3 class="text-white"><?php echo $complete ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-danger text-center">
+                      <h1 class="font-light text-white">
+                        <i class="mdi mdi-delete-forever"></i>
+                      </h1>
+                      <h6 class="text-white">CANCELED</h6>
+                      <h3 class="text-white"><?php echo $cancel ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-dark text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-pause"></i>
+                      </h1>
+                      <h6 class="text-white">HOLD</h6>
+                      <h3 class="text-white"><?php echo $HOLD ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-info text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-source-commit-start"></i>
+                      </h1>
+                      <h6 class="text-white">INITIAL GERBER</h6>
+                      <h3 class="text-white"><?php echo $INITIALGERBER ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
+
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-white text-center">
+                      <h1 class="font-light text-black">
+                        <i class="me-2 mdi mdi-network-question"></i>
+                      </h1>
+                      <h6 class="text-black">ENGINEER QUESTION</h6>
+                      <h3 class="text-black"><?php echo $ENGINEERQUESTION ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
 
 
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-warning text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-message-settings-variant"></i>
+                      </h1>
+                      <h6 class="text-white">PROCESSED GERBER</h6>
+                      <h3 class="text-white"><?php echo $PROCESSEDGERBER ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
 
-                    ?>
-                      <tr role="button" onclick="window.location='manageOrder/orderView/?id=<?= $process['id'] ?>'">
-                        <td><?= $process["name"] ?></td>
-                        <td><?= $process["datetime"] ?></td>
-                      </tr>
-                    <?php
-                    }
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-primary text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-autorenew"></i>
+                      </h1>
+                      <h6 class="text-white">MANUFACTURING</h6>
+                      <h3 class="text-white"><?php echo $MANUFACTURING ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
 
-                    ?>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-cyan text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-truck-delivery"></i>
+                      </h1>
+                      <h6 class="text-white">DISPATCH BOARDS</h6>
+                      <h3 class="text-white"><?php echo $DISPATCHBOARDS ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
 
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-success text-center">
+                      <h1 class="font-light text-white">
+                        <i class="me-2 mdi mdi-home-modern"></i>
+                      </h1>
+                      <h6 class="text-white">BOARDS RECEIVE</h6>
+                      <h3 class="text-white"><?php echo $BOARDSRECEIVE ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
 
-                  </tbody>
-                </table>
+                <!-- Column -->
+                <div class="col-md-6 col-lg-3 col-xlg-3">
+                  <div class="card card-hover">
+                    <div class="box bg-white text-center">
+                      <h1 class="font-light text-black">
+                        <i class="me-2 mdi mdi-test-tube"></i>
+                      </h1>
+                      <h6 class="text-black">BOARDS TEST</h6>
+                      <h3 class="text-black"><?php echo $BOARDSTEST ?></h3>
+                    </div>
+                  </div>
+                </div>
+                <!-- Column -->
               </div>
             </div>
             <div class="col-md-6">
-              <div class="card">
-                <div class="card-body">
-                  <h4 class="card-title">Latest Quotation</h4>
-                </div>
-                <div class="comment-widgets scrollable">
-                  <!-- Comment Row -->
+              <div class="row">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Latest Quotation</h4>
+                  </div>
+                  <div class="comment-widgets scrollable">
+                    <!-- Comment Row -->
 
 
-                  <?php
+                    <?php
 
 
 
-                  $manuOrderQuery = "SELECT `order`.`id`,`quotation`.`datetime`,`manifacturer`.`name`,`manifacturer`.`img`,`order`.`name` AS `oname` FROM `quotation` INNER JOIN `order_has_manifacturer` ON `quotation`.`order_has_manifacturer_id`=`order_has_manifacturer`.`id` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` INNER JOIN `order` ON `order`.`id`=`order_has_manifacturer`.`order_id` ORDER BY `quotation`.`datetime` DESC LIMIT 5";
-                  $manuOrderResult = $db->search($manuOrderQuery);
+                    $manuOrderQuery = "SELECT `order`.`id`,`quotation`.`datetime`,`manifacturer`.`name`,`manifacturer`.`img`,`order`.`name` AS `oname` FROM `quotation` INNER JOIN `order_has_manifacturer` ON `quotation`.`order_has_manifacturer_id`=`order_has_manifacturer`.`id` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` INNER JOIN `order` ON `order`.`id`=`order_has_manifacturer`.`order_id` ORDER BY `quotation`.`datetime` DESC LIMIT 5";
+                    $manuOrderResult = $db->search($manuOrderQuery);
 
 
-                  for ($i = 0; $i < count($manuOrderResult); $i++) {
-                    $manufacturer = $manuOrderResult[$i];
+                    for ($i = 0; $i < count($manuOrderResult); $i++) {
+                      $manufacturer = $manuOrderResult[$i];
 
-                    $imgpath = "../assets/images/users/1.jpg";
-                    if (!empty($manufacturer["img"])) {
-                      $imgpath = "../resources/companyImg/" . $manufacturer["img"];
-                    }
+                      $imgpath = "../assets/images/users/1.jpg";
+                      if (!empty($manufacturer["img"])) {
+                        $imgpath = "../resources/companyImg/" . $manufacturer["img"];
+                      }
 
-                  ?>
-                    <div class="d-flex flex-row comment-row mt-0" onclick="window.location='manageOrder/orderView/?id=<?= $manufacturer['id'] ?>'" role="button">
-                      <div class="p-2">
-                        <img
-                          src="<?= $imgpath ?>"
-                          alt="user"
-                          width="50"
-                          class="rounded-circle" />
-                      </div>
-                      <div class="comment-text w-100">
-                        <h6 class="font-medium"><?= $manufacturer["name"] ?></h6>
-                        <span class="mb-3 d-block"><?= $manufacturer["oname"] ?>
-                        </span>
-                        <div class="comment-footer">
-                          <span class="text-muted float-end"><?= $manufacturer["datetime"] ?></span>
+                    ?>
+                      <div class="d-flex flex-row comment-row mt-0" onclick="window.location='manageOrder/orderView/?id=<?= $manufacturer['id'] ?>'" role="button">
+                        <div class="p-2">
+                          <img
+                            src="<?= $imgpath ?>"
+                            alt="user"
+                            width="50"
+                            class="rounded-circle" />
+                        </div>
+                        <div class="comment-text w-100">
+                          <h6 class="font-medium"><?= $manufacturer["name"] ?></h6>
+                          <span class="mb-3 d-block"><?= $manufacturer["oname"] ?>
+                          </span>
+                          <div class="comment-footer">
+                            <span class="text-muted float-end"><?= $manufacturer["datetime"] ?></span>
 
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                  <?php
-                  }
+                    <?php
+                    }
 
 
-                  ?>
+                    ?>
 
-                  <!-- Comment Row -->
+                    <!-- Comment Row -->
 
+                  </div>
                 </div>
               </div>
+              <div class="row">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title mb-0">New Orders (<?= count($newOrderArray) ?>)</h5>
+                  </div>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Order</th>
+                        <th scope="col">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      for ($or = 0; $or < count($newOrderArray); $or++) {
+                        $process = $newOrderArray[$or];
+
+
+
+                      ?>
+                        <tr role="button" onclick="window.location='manageOrder/orderView/?id=<?= $process['id'] ?>'">
+                          <td><?= $process["name"] ?></td>
+                          <td><?= $process["datetime"] ?></td>
+                        </tr>
+                      <?php
+                      }
+
+                      ?>
+
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
+
 
           </div>
           <!-- ============================================================== -->

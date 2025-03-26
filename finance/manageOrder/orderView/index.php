@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$_SESSION["rb_user"]["type"] == "finance_head")) {
+if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance" || $_SESSION["rb_user"]["type"] == "finance_head")) {
 ?>
   <!DOCTYPE html>
   <html dir="ltr" lang="en">
@@ -230,7 +230,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
                     href="../../manageFinance/"
                     aria-expanded="false"><i class="me-2 mdi mdi-account"></i><span class="hide-menu">Manage Finance</span></a>
                 </li>
-      
+
               <?php
               }
               ?>
@@ -267,7 +267,7 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
               </a>
               <h4 class="page-title">/ Order Details</h4>
 
-              
+
             </div>
           </div>
         </div>
@@ -496,7 +496,8 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
 
 
                                       <?php
-                                      if ($manufacturer['status'] == "PROCESSING" || $manufacturer['status'] == "COMPLETED") {
+                                      if ($manufacturer['status'] == "PROCESSING" || $manufacturer['status'] == "COMPLETED"|| $manufacturer['status'] == "INITIAL GERBER"|| $manufacturer['status'] == "ENGINEER QUESTION"|| $manufacturer['status'] == "PROCESSED GERBER"|| $manufacturer['status'] == "MANUFACTURING"
+                                      || $manufacturer['status'] == "DISPATCH BOARDS"|| $manufacturer['status'] == "BOARDS RECEIVE"|| $manufacturer['status'] == "BOARDS TEST"||$manufacturer['status'] == "HOLD") {
                                       ?>
                                         <h6 class="font-medium fw-bolder text-success">SELECTED</h6>
                                       <?php
@@ -549,6 +550,53 @@ if (isset($_SESSION["rb_user"]) && ($_SESSION["rb_user"]["type"] == "finance"||$
 
               </div>
 
+
+              <div class="row">
+                <div class="col-12 col-lg-6 offset-lg-3">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title mb-0">Order History</h5>
+                      <div class="row mt-2">
+                        <div class="col-12 justify-content-between">
+
+
+                          <?php
+
+                          $oh = $db->search("SELECT * FROM `order_history` WHERE `order_id`=? ORDER BY `date_time` ASC", 'i', [$id]);
+                          for ($his = 0; $his < count($oh); $his++) {
+                          ?>
+
+                            <span><?php echo $oh[$his]["date_time"] ?></span>
+
+
+                            <span><?php echo $oh[$his]["process"] ?></span>
+
+
+
+                            <?php
+
+                            if ((count($oh) - 1) > $his) {
+                            ?>
+                              <hr>
+                          <?php
+                            }
+                          }
+                          ?>
+
+
+
+
+
+
+
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
             <?php
             } else {
             ?>

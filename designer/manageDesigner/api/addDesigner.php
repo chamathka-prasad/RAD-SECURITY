@@ -73,8 +73,8 @@ if (isset($_SESSION["rb_user"])) {
         move_uploaded_file($img["tmp_name"], $path);
       }
       $password = uniqid();
-      $insertManifacturer = $db->iud("INSERT INTO `user`(`name`,`img`,`email`,`password`,`username`,`type`)
-            VALUES(?,?,?,?,?,?)", "ssssss", [$cname, $savePath, $email, $password, 'designer' . $password, 'designer']);
+      $insertManifacturer = $db->iud("INSERT INTO `user`(`name`,`img`,`email`,`password`,`username`,`type`,`u_status`)
+            VALUES(?,?,?,?,?,?,?)", "sssssss", [$cname, $savePath, $email, $password, 'designer' . $password, 'designer','ACTIVE']);
 
       if ($insertManifacturer['affected_rows'] > 0) {
 

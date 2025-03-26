@@ -735,55 +735,292 @@ justify-content-center
               }
 
 
+
+
+
+              $id = $_GET["id"];
+              $sql = "SELECT `order`.`id`,`order`.`status`,`order`.`name`,`order`.`dead_line`,`order`.`datetime`,`order`.`path` FROM `order` WHERE `id`=?";
+              $result = $db->search($sql, "i", [$id]);
+
+
+              if (count($result) == 1) {
+
+                $orderDetails = $result[0];
               ?>
+                <div class="row">
+                  <div class="col-md-6 col-12">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title mb-0">Order History</h5>
+                            <div class="row mt-2">
+                              <div class="col-12 justify-content-between">
+
+
+                                <?php
+
+                                $oh = $db->search("SELECT * FROM `order_history` WHERE `order_id`=? ORDER BY `date_time` ASC", 'i', [$id]);
+                                for ($his = 0; $his < count($oh); $his++) {
+                                ?>
+
+                                  <span><?php echo $oh[$his]["date_time"] ?></span>
+
+
+                                  <span><?php echo $oh[$his]["process"] ?></span>
 
 
 
-              <div class="row">
-                <div class="col-12 col-lg-6 offset-lg-3">
-                  <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title mb-0">Order History</h5>
-                      <div class="row mt-2">
-                        <div class="col-12 justify-content-between">
+                                  <?php
+
+                                  if ((count($oh) - 1) > $his) {
+                                  ?>
+                                    <hr>
+                                <?php
+                                  }
+                                }
+                                ?>
 
 
-                          <?php
-
-                          $oh = $db->search("SELECT * FROM `order_history` WHERE `order_id`=? ORDER BY `date_time` ASC", 'i', [$id]);
-                          for ($his = 0; $his < count($oh); $his++) {
-                          ?>
-
-                            <span><?php echo $oh[$his]["date_time"] ?></span>
 
 
-                            <span><?php echo $oh[$his]["process"] ?></span>
 
 
+
+                              </div>
+
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div class="col-md-6 col-12">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="card">
+                          <div class="card-body">
+                            <h4 class="card-title">Quotations Details</h4>
+                          </div>
+                          <div class="comment-widgets scrollable">
+                            <!-- Comment Row -->
 
                             <?php
 
-                            if ((count($oh) - 1) > $his) {
+                            $manuOrderQuery = "SELECT `order_has_manifacturer`.`id`,`manifacturer`.`name`,`manifacturer`.`img`,`order_has_manifacturer`.`status` FROM `order_has_manifacturer` INNER JOIN `manifacturer` ON `manifacturer`.`id`=`order_has_manifacturer`.`manifacturer_id` WHERE `order_id`=?";
+                            $manuOrderResult = $db->search($manuOrderQuery, "i", [$orderDetails["id"]]);
+
+
+                            for ($i = 0; $i < count($manuOrderResult); $i++) {
+                              $manufacturer = $manuOrderResult[$i];
+
+                              $imgpath = "../../../assets/images/users/d3.jpg";
+                              if (!empty($manufacturer["img"])) {
+                                $imgpath = "../../../resources/companyImg/" . $manufacturer["img"];
+                              }
+
+                              if ($orderDetails["status"] == "NEW") {
                             ?>
-                              <hr>
+                                <div class="d-flex flex-row comment-row mt-0">
+                                  <div class="p-2">
+                                    <img
+                                      src="<?php echo $imgpath ?>"
+                                      alt="user"
+                                      width="60"
+                                      height="60"
+                                      class="rounded-circle" />
+                                  </div>
+                                  <div class="comment-text w-100">
+                                    <h6 class="font-medium"><?php echo $manufacturer["name"] ?></h6>
+
+
+                                    <?php
+                                    $quotationQuery = "SELECT * FROM `quotation` WHERE `order_has_manifacturer_id`=?";
+                                    $quotationResult = $db->search($quotationQuery, "i", [$manufacturer["id"]]);
+
+                                    if (count($quotationResult) == 1) {
+                                      $manuQuotation = $quotationResult[0];
+                                    ?>
+                                      <div class="comment-footer">
+                                        <span class="text-muted float-start"><?php echo $manuQuotation["datetime"] ?></span><br>
+                                        <button
+                                          type="button"
+                                          class="btn btn-cyan btn-sm text-white mt-2" onclick="downloadFile('<?php echo '../../../resources/quotations/' . $manuQuotation['path'] ?>', '<?php echo $manufacturer['name'] . $manuQuotation['path'] ?>')">
+                                          Download Quotation
+                                        </button>
+                                        <!-- <button
+                                          type="button"
+                                          class="btn btn-success btn-sm text-white mt-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop<?php echo $manuQuotation["id"] ?>">
+                                          Select The Quotation
+                                        </button> -->
+
+                                      </div>
+                                      <!-- Modal -->
+                                      <div class="modal fade" id="staticBackdrop<?php echo $manuQuotation["id"] ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                          <div class="modal-content">
+                                            <div class="modal-header">
+                                              <h1 class="modal-title fs-5" id="staticBackdropLabel">QUOTATION Selection confirmation</h1>
+                                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                              <h5 class="card-title mb-0">Order Details</h5>
+                                              <div class="row mt-2">
+                                                <div class="col-12">
+                                                  <span><?php echo $orderDetails["name"] ?></span>
+                                                </div>
+                                                <div class="col-12">
+                                                  <span>Order Date : <?php echo $orderDetails["datetime"] ?></span>
+                                                </div>
+                                                <div class="col-12">
+                                                  <span>Deadline : <?php echo $orderDetails["dead_line"] ?></span>
+                                                </div>
+
+                                                <hr>
+
+
+
+                                              </div>
+                                              <h5 class="card-title mb-0">Selcted Quotation Details</h5>
+                                              <div class="row">
+
+                                                <div class="col-12">
+                                                  <div class="p-2">
+                                                    <img
+                                                      src="<?php echo $imgpath ?>"
+                                                      alt="user"
+                                                      width="60"
+                                                      height="60"
+                                                      class="" />
+                                                  </div>
+                                                </div>
+                                                <div class="col-12 mt-2">
+                                                  <span><?php echo $manufacturer["name"] ?></span>
+                                                </div>
+                                                <div class="col-12">
+                                                  <span>Quotation Submit Date <?php echo $manuQuotation["datetime"] ?></span>
+                                                </div>
+                                                <hr>
+                                                <div class="col-12 mt-4">
+                                                  <label for="" class="form-label">Type <b class="text-warning">"select"</b> to Select The Quotation</label>
+                                                  <input type="text" class="form-control" placeholder="select" id="select<?php echo $manuQuotation["id"] ?>" />
+                                                </div>
+
+                                              </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                              <button type="button" class="btn btn-primary" onclick="selectTheQuotation(<?php echo $orderDetails['id'] ?>,<?php echo $manufacturer['id'] ?>,<?php echo $manuQuotation['id'] ?>)">Confirm</button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    <?php
+                                    } else {
+                                    ?>
+                                      <div class="comment-footer">
+                                        <span class="float-start-0 text-danger">Not Yet Submitted</span>
+
+                                      </div>
+                                    <?php
+                                    }
+                                    ?>
+
+                                  </div>
+                                </div>
+                              <?php
+                              } else {
+
+                              ?>
+                                <div class="d-flex flex-row comment-row mt-0">
+                                  <div class="p-2">
+                                    <img
+                                      src="<?php echo $imgpath ?>"
+                                      alt="user"
+                                      width="60"
+                                      height="60"
+                                      class="rounded-circle" />
+                                  </div>
+                                  <div class="comment-text w-100">
+                                    <h6 class="font-medium"><?php echo $manufacturer["name"] ?>
+
+                                    </h6>
+
+
+                                    <?php
+                                    $quotationQuery = "SELECT * FROM `quotation` WHERE `order_has_manifacturer_id`=?";
+                                    $quotationResult = $db->search($quotationQuery, "i", [$manufacturer["id"]]);
+
+                                    if (count($quotationResult) == 1) {
+                                      $manuQuotation = $quotationResult[0];
+                                    ?>
+                                      <div class="comment-footer">
+                                        <span class="text-muted float-start">Quotation Submit Date: <?php echo $manuQuotation["datetime"] ?></span><br>
+
+
+                                        <?php
+                                        if (
+                                          $manufacturer['status'] == "PROCESSING" || $manufacturer['status'] == "COMPLETED" || $manufacturer['status'] == "INITIAL GERBER" || $manufacturer['status'] == "ENGINEER QUESTION" || $manufacturer['status'] == "PROCESSED GERBER" || $manufacturer['status'] == "MANUFACTURING"
+                                          || $manufacturer['status'] == "DISPATCH BOARDS" || $manufacturer['status'] == "BOARDS RECEIVE" || $manufacturer['status'] == "BOARDS TEST" || $manufacturer['status'] == "HOLD"
+                                        ) {
+                                        ?>
+                                          <h6 class="font-medium fw-bolder text-success">SELECTED</h6>
+                                        <?php
+                                        } else if ($manufacturer['status'] == "LOSS") {
+                                        ?>
+                                          <h6 class="font-medium fw-bolder text-warning">NOT SELECTED</h6>
+                                        <?php
+                                        }
+                                        ?>
+
+                                        <button
+                                          type="button"
+                                          class="btn btn-cyan btn-sm text-white" onclick="downloadFile('<?php echo '../../../resources/quotations/' . $manuQuotation['path'] ?>', '<?php echo $manufacturer['name'] . $manuQuotation['path'] ?>')">
+                                          Download Quotation
+                                        </button>
+
+
+                                      </div>
+                                      <!-- Modal -->
+
+                                    <?php
+                                    } else {
+                                    ?>
+                                      <div class="comment-footer">
+                                        <span class="float-start-0 text-danger"><?php echo $manufacturer["status"] ?></span>
+
+                                      </div>
+                                    <?php
+                                    }
+                                    ?>
+
+                                  </div>
+                                </div>
+                              <?php
+
+                              }
+
+                              ?>
+
                           <?php
+
                             }
                           }
                           ?>
-
-
-
-
-
-
-
+                          </div>
                         </div>
 
                       </div>
-
                     </div>
                   </div>
+
                 </div>
+
+
+
+
 
               <?php
             } else {
@@ -806,355 +1043,111 @@ justify-content-center
             <!-- ============================================================== -->
             <!-- End Right sidebar -->
             <!-- ============================================================== -->
-              </div>
-              <!-- ============================================================== -->
-              <!-- End Container fluid  -->
-              <!-- ============================================================== -->
-              <!-- ============================================================== -->
-              <!-- footer -->
-              <!-- ============================================================== -->
-
-              <!-- ============================================================== -->
-              <!-- End footer -->
-              <!-- ============================================================== -->
         </div>
         <!-- ============================================================== -->
-        <!-- End Page wrapper  -->
+        <!-- End Container fluid  -->
+        <!-- ============================================================== -->
+        <!-- ============================================================== -->
+        <!-- footer -->
+        <!-- ============================================================== -->
+
+        <!-- ============================================================== -->
+        <!-- End footer -->
         <!-- ============================================================== -->
       </div>
       <!-- ============================================================== -->
-      <!-- End Wrapper -->
+      <!-- End Page wrapper  -->
       <!-- ============================================================== -->
-      <!-- ============================================================== -->
-      <!-- All Jquery -->
-      <!-- ============================================================== -->
-      <script src="../../../assets/libs/jquery/dist/jquery.min.js"></script>
-      <!-- Bootstrap tether Core JavaScript -->
-      <script src="../../../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-      <!-- slimscrollbar scrollbar JavaScript -->
-      <script src="../../../assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
-      <script src="../../../assets/extra-libs/sparkline/sparkline.js"></script>
-      <!--Wave Effects -->
-      <script src="../../../dist/js/waves.js"></script>
-      <!--Menu sidebar -->
-      <script src="../../../dist/js/sidebarmenu.js"></script>
-      <!--Custom JavaScript -->
-      <script src="../../../dist/js/custom.min.js"></script>
-      <!-- this page js -->
-      <script src="../../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
-      <script src="../../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
-      <script src="../../../assets/extra-libs/DataTables/datatables.min.js"></script>
+    </div>
+    <!-- ============================================================== -->
+    <!-- End Wrapper -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- All Jquery -->
+    <!-- ============================================================== -->
+    <script src="../../../assets/libs/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="../../../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- slimscrollbar scrollbar JavaScript -->
+    <script src="../../../assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
+    <script src="../../../assets/extra-libs/sparkline/sparkline.js"></script>
+    <!--Wave Effects -->
+    <script src="../../../dist/js/waves.js"></script>
+    <!--Menu sidebar -->
+    <script src="../../../dist/js/sidebarmenu.js"></script>
+    <!--Custom JavaScript -->
+    <script src="../../../dist/js/custom.min.js"></script>
+    <!-- this page js -->
+    <script src="../../../assets/extra-libs/multicheck/datatable-checkbox-init.js"></script>
+    <script src="../../../assets/extra-libs/multicheck/jquery.multicheck.js"></script>
+    <script src="../../../assets/extra-libs/DataTables/datatables.min.js"></script>
 
-      <script src="../../../assets/libs/toastr/build/toastr.min.js"></script>
-      <script>
-        const fileIcons = {
-          'pdf': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
+    <script src="../../../assets/libs/toastr/build/toastr.min.js"></script>
+    <script>
+      const fileIcons = {
+        'pdf': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.6 11.85H0v3.999h.791v-1.342h.803q.43 0 .732-.173.305-.175.463-.474a1.4 1.4 0 0 0 .161-.677q0-.375-.158-.677a1.2 1.2 0 0 0-.46-.477q-.3-.18-.732-.179m.545 1.333a.8.8 0 0 1-.085.38.57.57 0 0 1-.238.241.8.8 0 0 1-.375.082H.788V12.48h.66q.327 0 .512.181.185.183.185.522m1.217-1.333v3.999h1.46q.602 0 .998-.237a1.45 1.45 0 0 0 .595-.689q.196-.45.196-1.084 0-.63-.196-1.075a1.43 1.43 0 0 0-.589-.68q-.396-.234-1.005-.234zm.791.645h.563q.371 0 .609.152a.9.9 0 0 1 .354.454q.118.302.118.753a2.3 2.3 0 0 1-.068.592 1.1 1.1 0 0 1-.196.422.8.8 0 0 1-.334.252 1.3 1.3 0 0 1-.483.082h-.563zm3.743 1.763v1.591h-.79V11.85h2.548v.653H7.896v1.117h1.606v.638z"/>
 </svg>`,
-          'doc': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-word" viewBox="0 0 16 16">
+        'doc': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-word" viewBox="0 0 16 16">
   <path d="M5.485 6.879a.5.5 0 1 0-.97.242l1.5 6a.5.5 0 0 0 .967.01L8 9.402l1.018 3.73a.5.5 0 0 0 .967-.01l1.5-6a.5.5 0 0 0-.97-.242l-1.036 4.144-.997-3.655a.5.5 0 0 0-.964 0l-.997 3.655L5.485 6.88z"/>
   <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
 </svg>`,
-          'xls': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-filetype-xls" viewBox="0 0 16 16">
+        'xls': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-filetype-xls" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM6.472 15.29a1.2 1.2 0 0 1-.111-.449h.765a.58.58 0 0 0 .254.384q.106.073.25.114.143.041.319.041.246 0 .413-.07a.56.56 0 0 0 .255-.193.5.5 0 0 0 .085-.29.39.39 0 0 0-.153-.326q-.152-.12-.462-.193l-.619-.143a1.7 1.7 0 0 1-.539-.214 1 1 0 0 1-.351-.367 1.1 1.1 0 0 1-.123-.524q0-.366.19-.639.19-.272.527-.422.338-.15.777-.149.457 0 .78.152.324.153.5.41.18.255.2.566h-.75a.56.56 0 0 0-.12-.258.6.6 0 0 0-.247-.181.9.9 0 0 0-.369-.068q-.325 0-.513.152a.47.47 0 0 0-.184.384q0 .18.143.3a1 1 0 0 0 .405.175l.62.143q.326.075.566.211a1 1 0 0 1 .375.358q.135.222.135.56 0 .37-.188.656a1.2 1.2 0 0 1-.539.439q-.351.158-.858.158-.381 0-.665-.09a1.4 1.4 0 0 1-.478-.252 1.1 1.1 0 0 1-.29-.375m-2.945-3.358h-.893L1.81 13.37h-.036l-.832-1.438h-.93l1.227 1.983L0 15.931h.861l.853-1.415h.035l.85 1.415h.908L2.253 13.94zm2.727 3.325H4.557v-3.325h-.79v4h2.487z"/>
 </svg>`,
-          'ppt': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-filetype-ppt" viewBox="0 0 16 16">
+        'ppt': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-filetype-ppt" viewBox="0 0 16 16">
   <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.6 11.85H0v3.999h.791v-1.342h.803q.43 0 .732-.173.305-.175.463-.474a1.4 1.4 0 0 0 .161-.677q0-.375-.158-.677a1.2 1.2 0 0 0-.46-.477q-.3-.18-.732-.179m.545 1.333a.8.8 0 0 1-.085.38.57.57 0 0 1-.238.241.8.8 0 0 1-.375.082H.788V12.48h.66q.327 0 .512.181.185.183.185.522m2.817-1.333h-1.6v3.999h.791v-1.342h.803q.43 0 .732-.173.305-.175.463-.474.162-.302.161-.677 0-.375-.158-.677a1.2 1.2 0 0 0-.46-.477q-.3-.18-.732-.179m.545 1.333a.8.8 0 0 1-.085.38.57.57 0 0 1-.238.241.8.8 0 0 1-.375.082H4.15V12.48h.66q.327 0 .512.181.185.183.185.522m2.767-.67v3.336H7.48v-3.337H6.346v-.662h3.065v.662z"/>
 </svg>`,
-          'jpg': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-image" viewBox="0 0 16 16">
+        'jpg': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-image" viewBox="0 0 16 16">
   <path d="M8.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
   <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8l-2.083-2.083a.5.5 0 0 0-.76.063L8 11 5.835 9.7a.5.5 0 0 0-.611.076L3 12z"/>
 </svg>`,
-          'zip': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-zip-fill" viewBox="0 0 16 16">
+        'zip': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-zip-fill" viewBox="0 0 16 16">
   <path d="M8.5 9.438V8.5h-1v.938a1 1 0 0 1-.03.243l-.4 1.598.93.62.93-.62-.4-1.598a1 1 0 0 1-.03-.243"/>
   <path d="M4 0h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m2.5 8.5v.938l-.4 1.599a1 1 0 0 0 .416 1.074l.93.62a1 1 0 0 0 1.109 0l.93-.62a1 1 0 0 0 .415-1.074l-.4-1.599V8.5a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1m1-5.5h-1v1h1v1h-1v1h1v1H9V6H8V5h1V4H8V3h1V2H8V1H6.5v1h1z"/>
 </svg>`,
-          'txt': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-fill" viewBox="0 0 16 16">
+        'txt': `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-fill" viewBox="0 0 16 16">
   <path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2z"/>
 </svg>`
-        };
+      };
 
-        const defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-richtext" viewBox="0 0 16 16">
+      const defaultIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-richtext" viewBox="0 0 16 16">
   <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"/>
   <path d="M4.5 12.5A.5.5 0 0 1 5 12h3a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5m0-2A.5.5 0 0 1 5 10h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5m1.639-3.708 1.33.886 1.854-1.855a.25.25 0 0 1 .289-.047l1.888.974V8.5a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V8s1.54-1.274 1.639-1.208M6.25 6a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5"/>
 </svg>`;
 
 
 
-        function saveChat(chatroomId) {
-          var chatText = document.getElementById("chatText");
+      function saveChat(chatroomId) {
+        var chatText = document.getElementById("chatText");
 
 
 
-          if (!chatroomId) {
+        if (!chatroomId) {
 
-            toastr.error(
-              "Error Reload The Page",
-              "Empty Details !"
-            );
+          toastr.error(
+            "Error Reload The Page",
+            "Empty Details !"
+          );
 
 
-          } else if (!chatText.value) {
+        } else if (!chatText.value) {
 
-            toastr.error(
-              "Please Type Something For Before Send",
-              "Empty Details !"
-            );
+          toastr.error(
+            "Please Type Something For Before Send",
+            "Empty Details !"
+          );
 
-          } else {
-
-            var formData = new FormData();
-            formData.append("chatroomId", chatroomId);
-            formData.append("chatText", chatText.value);
-
-            fetch("api/saveDesignerChat.php", {
-                method: "POST",
-                body: formData,
-
-              })
-              .then(function(resp) {
-
-                try {
-                  let response = resp.json();
-                  return response;
-                } catch (error) {
-                  msg.classList = "alert alert-danger";
-                  msg.innerHTML = "Something wrong please try again";
-                  emailField.classList = "form-control";
-                  passwordField.classList = "form-control";
-                }
-
-              })
-              .then(function(value) {
-
-                if (value.type == "error") {
-                  toastr.error(
-                    value.message,
-                    "Error !"
-                  );
-
-
-                } else if (value.type == "success") {
-                  toastr.success(value.message, "Success");
-                  chatText.value = "";
-                  loadAllChats(chatroomId);
-                } else {
-                  toastr.error(
-                    "Something Went Wrong Please Try Again",
-                    "Error !"
-                  );
-                }
-
-              })
-              .catch(function(error) {
-                console.log(error);
-              });
-
-
-          }
-        }
-
-        function saveFileChat(chatroomId) {
-          var chatFile = document.getElementById("msgFile");
-
-
-
-          if (!chatroomId) {
-
-            toastr.error(
-              "Error Reload The Page",
-              "Empty Details !"
-            );
-
-
-          } else if (!chatFile.files[0]) {
-
-            toastr.error(
-              "Select A File For Before Send",
-              "Empty Details !"
-            );
-
-          } else {
-
-            var formData = new FormData();
-            formData.append("chatroomId", chatroomId);
-            formData.append("chatFile", chatFile.files[0]);
-
-            fetch("api/saveDesignerFileChat.php", {
-                method: "POST",
-                body: formData,
-
-              })
-              .then(function(resp) {
-
-                try {
-                  let response = resp.json();
-                  return response;
-                } catch (error) {
-                  msg.classList = "alert alert-danger";
-                  msg.innerHTML = "Something wrong please try again";
-                  emailField.classList = "form-control";
-                  passwordField.classList = "form-control";
-                }
-
-              })
-              .then(function(value) {
-
-                if (value.type == "error") {
-                  toastr.error(
-                    value.message,
-                    "Error !"
-                  );
-
-
-                } else if (value.type == "success") {
-
-                  $('#uploadFile').modal('hide');
-                  toastr.success(value.message, "Success");
-                  chatFile.value = null;
-
-                  loadAllChats(chatroomId);
-                } else {
-                  toastr.error(
-                    "Something Went Wrong Please Try Again",
-                    "Error !"
-                  );
-                }
-
-              })
-              .catch(function(error) {
-                console.log(error);
-              });
-
-
-          }
-        }
-
-
-        function changeTheOrderStatusByModel(id) {
-          var orderNewStatus = document.getElementById("orderNewStatus");
-          var field = document.getElementById("statusChangeText").value;
-          if (orderNewStatus.value == field) {
-
-            var formData = new FormData();
-            formData.append("orderId", id);
-            formData.append("status", field);
-
-            fetch("api/changeStatus.php", {
-                method: "POST",
-                body: formData,
-
-              })
-              .then(function(resp) {
-
-                try {
-                  let response = resp.json();
-                  return response;
-                } catch (error) {
-                  msg.classList = "alert alert-danger";
-                  msg.innerHTML = "Something wrong please try again";
-                  emailField.classList = "form-control";
-                  passwordField.classList = "form-control";
-                }
-
-              })
-              .then(function(value) {
-
-                if (value.type == "error") {
-                  toastr.error(
-                    value.message,
-                    "Error !"
-                  );
-
-
-                } else if (value.type == "success") {
-                  toastr.success(value.message, "Success");
-                  window.location = "?id=" + id;
-
-                } else {
-                  toastr.error(
-                    "Something Went Wrong Please Try Again",
-                    "Error !"
-                  );
-                }
-
-              })
-              .catch(function(error) {
-                console.log(error);
-              });
-          } else {
-
-            toastr.error(
-              "Please Type Correctly To Proceed",
-              "Incorrect Type !"
-            );
-          }
-        }
-
-
-        function changeTheOrderStatus() {
-          var selectStatus = document.getElementById("statusChange");
-
-
-
-          if (selectStatus.value == "0") {
-
-            toastr.error(
-              "Please Select the Status",
-              "Not Selected !"
-            );
-          } else {
-            document.getElementById("statusChangeText").value = selectStatus.value;
-            document.getElementById("statInformText").innerHTML = '"' + selectStatus.value + '"';
-            $('#stateChangeModel').modal('show');
-          }
-
-        }
-
-        async function downloadFile(url, suggestedName) {
-          try {
-            // Fetch the file as a blob
-            const response = await fetch(url);
-            const blob = await response.blob();
-
-            // Check if the browser supports the File System Access API
-            if ('showSaveFilePicker' in window) {
-              const handle = await window.showSaveFilePicker({
-                suggestedName: suggestedName,
-                types: [{
-                  accept: {
-                    'application/octet-stream': ['.pdf']
-                  }
-                }]
-              });
-
-              const writable = await handle.createWritable();
-              await writable.write(blob);
-              await writable.close();
-            } else {
-              // Fallback method if File System Access API is not supported
-              const anchor = document.createElement("a");
-              anchor.href = URL.createObjectURL(blob);
-              anchor.download = suggestedName;
-              document.body.appendChild(anchor);
-              anchor.click();
-              document.body.removeChild(anchor);
-              URL.revokeObjectURL(anchor.href);
-            }
-          } catch (error) {
-            console.error("Error downloading file:", error);
-          }
-        }
-
-
-        function loadAllChats(chatRoomId) {
+        } else {
 
           var formData = new FormData();
-          formData.append("chatRoomId", chatRoomId);
+          formData.append("chatroomId", chatroomId);
+          formData.append("chatText", chatText.value);
 
-          fetch("api/getAllChats.php", {
+          fetch("api/saveDesignerChat.php", {
               method: "POST",
               body: formData,
+
             })
             .then(function(resp) {
 
@@ -1162,36 +1155,280 @@ justify-content-center
                 let response = resp.json();
                 return response;
               } catch (error) {
-
+                msg.classList = "alert alert-danger";
+                msg.innerHTML = "Something wrong please try again";
+                emailField.classList = "form-control";
+                passwordField.classList = "form-control";
               }
 
             })
             .then(function(value) {
 
-              var chatContainer = document.getElementById('chatContainer');
-              chatContainer.innerHTML = "";
+              if (value.type == "error") {
+                toastr.error(
+                  value.message,
+                  "Error !"
+                );
+
+
+              } else if (value.type == "success") {
+                toastr.success(value.message, "Success");
+                chatText.value = "";
+                loadAllChats(chatroomId);
+              } else {
+                toastr.error(
+                  "Something Went Wrong Please Try Again",
+                  "Error !"
+                );
+              }
+
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+
+
+        }
+      }
+
+      function saveFileChat(chatroomId) {
+        var chatFile = document.getElementById("msgFile");
 
 
 
-              var num = 1;
+        if (!chatroomId) {
 
-              value.forEach(element => {
+          toastr.error(
+            "Error Reload The Page",
+            "Empty Details !"
+          );
 
-                // var imgpath = "../../../assets/images/users/1.jpg";
-                // if (element.img) {
-                //   imgpath = "../../../resources/companyImg/" + element.img;
-                // }
 
-                var lastId = "";
-                if (value.length == num) {
-                  lastId = "chat";
+        } else if (!chatFile.files[0]) {
+
+          toastr.error(
+            "Select A File For Before Send",
+            "Empty Details !"
+          );
+
+        } else {
+
+          var formData = new FormData();
+          formData.append("chatroomId", chatroomId);
+          formData.append("chatFile", chatFile.files[0]);
+
+          fetch("api/saveDesignerFileChat.php", {
+              method: "POST",
+              body: formData,
+
+            })
+            .then(function(resp) {
+
+              try {
+                let response = resp.json();
+                return response;
+              } catch (error) {
+                msg.classList = "alert alert-danger";
+                msg.innerHTML = "Something wrong please try again";
+                emailField.classList = "form-control";
+                passwordField.classList = "form-control";
+              }
+
+            })
+            .then(function(value) {
+
+              if (value.type == "error") {
+                toastr.error(
+                  value.message,
+                  "Error !"
+                );
+
+
+              } else if (value.type == "success") {
+
+                $('#uploadFile').modal('hide');
+                toastr.success(value.message, "Success");
+                chatFile.value = null;
+
+                loadAllChats(chatroomId);
+              } else {
+                toastr.error(
+                  "Something Went Wrong Please Try Again",
+                  "Error !"
+                );
+              }
+
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+
+
+        }
+      }
+
+
+      function changeTheOrderStatusByModel(id) {
+        var orderNewStatus = document.getElementById("orderNewStatus");
+        var field = document.getElementById("statusChangeText").value;
+        if (orderNewStatus.value == field) {
+
+          var formData = new FormData();
+          formData.append("orderId", id);
+          formData.append("status", field);
+
+          fetch("api/changeStatus.php", {
+              method: "POST",
+              body: formData,
+
+            })
+            .then(function(resp) {
+
+              try {
+                let response = resp.json();
+                return response;
+              } catch (error) {
+                msg.classList = "alert alert-danger";
+                msg.innerHTML = "Something wrong please try again";
+                emailField.classList = "form-control";
+                passwordField.classList = "form-control";
+              }
+
+            })
+            .then(function(value) {
+
+              if (value.type == "error") {
+                toastr.error(
+                  value.message,
+                  "Error !"
+                );
+
+
+              } else if (value.type == "success") {
+                toastr.success(value.message, "Success");
+                window.location = "?id=" + id;
+
+              } else {
+                toastr.error(
+                  "Something Went Wrong Please Try Again",
+                  "Error !"
+                );
+              }
+
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        } else {
+
+          toastr.error(
+            "Please Type Correctly To Proceed",
+            "Incorrect Type !"
+          );
+        }
+      }
+
+
+      function changeTheOrderStatus() {
+        var selectStatus = document.getElementById("statusChange");
+
+
+
+        if (selectStatus.value == "0") {
+
+          toastr.error(
+            "Please Select the Status",
+            "Not Selected !"
+          );
+        } else {
+          document.getElementById("statusChangeText").value = selectStatus.value;
+          document.getElementById("statInformText").innerHTML = '"' + selectStatus.value + '"';
+          $('#stateChangeModel').modal('show');
+        }
+
+      }
+
+      async function downloadFile(url, suggestedName) {
+        try {
+          // Fetch the file as a blob
+          const response = await fetch(url);
+          const blob = await response.blob();
+
+          // Check if the browser supports the File System Access API
+          if ('showSaveFilePicker' in window) {
+            const handle = await window.showSaveFilePicker({
+              suggestedName: suggestedName,
+              types: [{
+                accept: {
+                  'application/octet-stream': ['.pdf']
                 }
-                if (element.person == "manufacturer") {
+              }]
+            });
 
-                  if (element.type == "text") {
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+          } else {
+            // Fallback method if File System Access API is not supported
+            const anchor = document.createElement("a");
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = suggestedName;
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(anchor.href);
+          }
+        } catch (error) {
+          console.error("Error downloading file:", error);
+        }
+      }
 
 
-                    chatContainer.innerHTML = chatContainer.innerHTML + `<li class="chat-item" id="lastId${lastId}">
+      function loadAllChats(chatRoomId) {
+
+        var formData = new FormData();
+        formData.append("chatRoomId", chatRoomId);
+
+        fetch("api/getAllChats.php", {
+            method: "POST",
+            body: formData,
+          })
+          .then(function(resp) {
+
+            try {
+              let response = resp.json();
+              return response;
+            } catch (error) {
+
+            }
+
+          })
+          .then(function(value) {
+
+            var chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = "";
+
+
+
+            var num = 1;
+
+            value.forEach(element => {
+
+              // var imgpath = "../../../assets/images/users/1.jpg";
+              // if (element.img) {
+              //   imgpath = "../../../resources/companyImg/" + element.img;
+              // }
+
+              var lastId = "";
+              if (value.length == num) {
+                lastId = "chat";
+              }
+              if (element.person == "manufacturer") {
+
+                if (element.type == "text") {
+
+
+                  chatContainer.innerHTML = chatContainer.innerHTML + `<li class="chat-item" id="lastId${lastId}">
                   <div class="chat-img">
                                     <img src="<?php echo $imgpath ?>" height="42" width="42" alt="user" />
                                   </div>
@@ -1203,12 +1440,12 @@ ${element.message}
         </div>
         <div class="chat-time">${element.datetime}</div>
       </li>`;
-                  } else if (element.type == "file") {
+                } else if (element.type == "file") {
 
-                    const ext = element.message.split('.').pop().toLowerCase();
-                    const iconSVG = fileIcons[ext] || defaultIcon;
+                  const ext = element.message.split('.').pop().toLowerCase();
+                  const iconSVG = fileIcons[ext] || defaultIcon;
 
-                    chatContainer.innerHTML = chatContainer.innerHTML + `<li class=" chat-item" onclick="downloadFile('../../../resources/chat/${element.message}', 'userfile${element.message}')" id="lastId${lastId}">
+                  chatContainer.innerHTML = chatContainer.innerHTML + `<li class=" chat-item" onclick="downloadFile('../../../resources/chat/${element.message}', 'userfile${element.message}')" id="lastId${lastId}">
         <div class="chat-img">
                                     <img src="<?php echo $imgpath ?>" height="42" width="42" alt="user" />
                                   </div>
@@ -1220,14 +1457,14 @@ ${iconSVG}<div>${element.message}</div>
         </div>
         <div class="chat-time">${element.datetime}</div>
       </li>`;
-                  }
+                }
 
-                } else if (element.person == "designer") {
+              } else if (element.person == "designer") {
 
-                  if (element.type == "text") {
+                if (element.type == "text") {
 
 
-                    chatContainer.innerHTML = chatContainer.innerHTML + `<li class="odd chat-item" id="lastId${lastId}">
+                  chatContainer.innerHTML = chatContainer.innerHTML + `<li class="odd chat-item" id="lastId${lastId}">
                           <div class="chat-content">
                             <div class="box bg-light-inverse">
     ${element.message}
@@ -1236,12 +1473,12 @@ ${iconSVG}<div>${element.message}</div>
                           </div>
                           <div class="chat-time">${element.datetime}</div>
                         </li>`;
-                  } else if (element.type == "file") {
+                } else if (element.type == "file") {
 
-                    const ext = element.message.split('.').pop().toLowerCase();
-                    const iconSVG = fileIcons[ext] || defaultIcon;
+                  const ext = element.message.split('.').pop().toLowerCase();
+                  const iconSVG = fileIcons[ext] || defaultIcon;
 
-                    chatContainer.innerHTML = chatContainer.innerHTML + `<li class="odd chat-item" onclick="downloadFile('../../../resources/chat/${element.message}', 'userfile${element.message}')" id="lastId${lastId}">
+                  chatContainer.innerHTML = chatContainer.innerHTML + `<li class="odd chat-item" onclick="downloadFile('../../../resources/chat/${element.message}', 'userfile${element.message}')" id="lastId${lastId}">
                           <div class="chat-content">
                             <div class="box bg-dark-inverse text-warning">
    ${iconSVG}<div>${element.message}</div>
@@ -1250,20 +1487,20 @@ ${iconSVG}<div>${element.message}</div>
                           </div>
                           <div class="chat-time">${element.datetime}</div>
                         </li>`;
-                  }
                 }
-                num++;
+              }
+              num++;
 
-              });
-
-              document.getElementById("lastIdchat").scrollIntoView(false);
-
-            })
-            .catch(function(error) {
-              console.log(error);
             });
 
-        }
+            document.getElementById("lastIdchat").scrollIntoView(false);
+
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+
+      }
 
 
 
@@ -1272,8 +1509,8 @@ ${iconSVG}<div>${element.message}</div>
 
 
 
-        $("#zero_config").DataTable();
-      </script>
+      $("#zero_config").DataTable();
+    </script>
   </body>
 
   </html>

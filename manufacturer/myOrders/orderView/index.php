@@ -385,7 +385,7 @@ if (isset($_SESSION["rb_manu"])) {
             <?php
           } else {
             $uid = $_GET["orderNum"];
-            $sql = "SELECT `order_has_manifacturer`.`id`,`order_has_manifacturer`.`status`,`order`.`name`,`order`.`dead_line`,`order`.`datetime`,`order`.`path`  FROM order_has_manifacturer INNER JOIN `order` ON `order`.`id`=`order_has_manifacturer`.`order_id` WHERE `uid`=?";
+            $sql = "SELECT `order_has_manifacturer`.`id`,`order_has_manifacturer`.`status`,`order`.`name`,`order`.`dead_line`,`order`.`datetime`,`order`.`path`,`order`.`id` AS `order_id_history`  FROM order_has_manifacturer INNER JOIN `order` ON `order`.`id`=`order_has_manifacturer`.`order_id` WHERE `uid`=?";
             $result = $db->search($sql, "s", [$uid]);
 
 
@@ -767,6 +767,53 @@ if (isset($_SESSION["rb_manu"])) {
                         </div>
                       </div>
 
+                    </div>
+
+                    <div class="row">
+                      <div class="col-12 col-lg-6 offset-lg-3">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title mb-0">Order History</h5>
+                            <div class="row mt-2">
+                              <div class="col-12 justify-content-between">
+
+
+                                <?php
+
+                                $oh = $db->search("SELECT * FROM `order_history` WHERE `order_id`=? ORDER BY `date_time` ASC", 'i', [$manuOrderDetails["order_id_history"]]);
+                                for ($his = 0; $his < count($oh); $his++) {
+                                ?>
+
+                                  <span><?php echo $oh[$his]["date_time"] ?></span>
+
+
+                                  <span><?php echo $oh[$his]["process"] ?></span>
+
+
+
+                                  <?php
+
+                                  if ((count($oh) - 1) > $his) {
+                                  ?>
+                                    <hr>
+                                <?php
+                                  }
+                                }
+                                ?>
+
+
+
+
+
+
+
+                              </div>
+
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                   <?php

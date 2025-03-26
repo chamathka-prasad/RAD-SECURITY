@@ -430,6 +430,7 @@ justify-content-center
                           <th scope="col">Email</th>
                           <th scope="col">Username</th>
                           <th scope="col">Type</th>
+                          <th scope="col">Status</th>
 
 
                         </thead>
@@ -644,6 +645,14 @@ justify-content-center
               if (element.img) {
                 imgpath = "../../resources/userImg/" + element.img;
               }
+
+              var act = "";
+              var deac = "";
+              if (element.u_status == "DEACTIVE") {
+                deac = "selected";
+              } else {
+                act = "selected"
+              }
               manuLoader.innerHTML = manuLoader.innerHTML +
                 `    <tr role="button" data-bs-toggle="modal" data-bs-target="#manuView${element.id}">
                           <th>${num}</th>
@@ -662,6 +671,7 @@ justify-content-center
                           <td>${element.email}</td>
                           <td>${element.username}</td>
                           <td>${element.type}</td>
+                          <td>${element.u_status}</td>
                          
 
                         </tr>
@@ -719,6 +729,20 @@ justify-content-center
                                   <img src="${imgpath}" id="view2${element.id}" alt="" height="200px">
                                   <input type="file" class="d-none" id="uimage${element.id}">
                                   <label for="uimage${element.id}" class="btn btn-primary " onclick="changeUpdateImg(${element.id})">+</label>
+                                </div>
+                              </div>
+                            </div>
+                            <hr/>
+                            <div class="col-12 col-lg-6">
+                              <div class="form-group row">
+                                <label
+                                  for="lname"
+                                  class="col-sm-3 text-start control-label col-form-label">Status<span class="text-danger">&#8727;</span></label>
+                                <div class="col-sm-9" >
+                                <select class="form-select" id="status${element.id}">
+                                <option value="ACTIVE" ${act}>ACTIVE</option>
+                                <option value="DEACTIVE" ${deac}>DEACTIVE</option>
+                                </select>
                                 </div>
                               </div>
                             </div>
@@ -881,6 +905,7 @@ justify-content-center
         var email = document.getElementById("uemail" + id);
         var username = document.getElementById("uusername" + id);
         var password = document.getElementById("upassword" + id);
+        var status = document.getElementById("status" + id);
 
 
 
@@ -924,6 +949,7 @@ justify-content-center
           formData.append("email", email.value);
           formData.append("username", username.value);
           formData.append("password", password.value);
+          formData.append("status", status.value);
           formData.append("cimg", cimage.files[0]);
 
           fetch("api/updatedesigner.php", {

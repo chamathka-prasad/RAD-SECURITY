@@ -38,6 +38,7 @@ if (isset($_SESSION["rb_user"])) {
     $email = $_POST["email"];
     $username = $_POST["username"];
     $password = $_POST["password"];
+    $status = $_POST["status"];
 
 
     $regex = '/^\+?\d+$/';
@@ -58,6 +59,10 @@ if (isset($_SESSION["rb_user"])) {
     } else if (empty($password)) {
         $message->type = "error";
         $message->message = "Password Is Empty";
+        echo json_encode($message);
+    } else if (empty($status)) {
+        $message->type = "error";
+        $message->message = "Status Is Empty";
         echo json_encode($message);
     } else {
 
@@ -83,14 +88,14 @@ if (isset($_SESSION["rb_user"])) {
                     $path = "../../../resources/userImg/" . $fileName . "." . $ext;
                     move_uploaded_file($img["tmp_name"], $path);
 
-                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`img`=?,`email`=?,`username`=? WHERE `id`=?
-                ", "sssssi", [$cname, $password, $savePath, $email, $username, $id]);
+                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`img`=?,`email`=?,`username`=?,`u_status`=? WHERE `id`=?
+                ", "ssssssi", [$cname, $password, $savePath, $email, $username,$status,$id]);
 
                     if ($insertManifacturer['affected_rows'] > 0) {
 
 
                         $message->type = "success";
-                        $message->message = "Designer Update Success";
+                        $message->message = "User Update Success";
                         echo json_encode($message);
                     } else {
                         $message->type = "error";
@@ -98,13 +103,13 @@ if (isset($_SESSION["rb_user"])) {
                         echo json_encode($message);
                     }
                 } else {
-                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`email`=?,`username`=? WHERE `id`=?", "ssssi", [$cname, $password, $email, $username, $id]);
+                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`email`=?,`username`=?,`u_status`=? WHERE `id`=?", "sssssi", [$cname, $password, $email, $username,$status, $id]);
 
                     if ($insertManifacturer['affected_rows'] > 0) {
 
 
                         $message->type = "success";
-                        $message->message = "Designer Update Success";
+                        $message->message = "User Update Success";
                         echo json_encode($message);
                     } else {
                         $message->type = "error";
@@ -119,10 +124,10 @@ if (isset($_SESSION["rb_user"])) {
 
                 if ($manifacurer["name"] == $cname) {
                     $message->message = " Name Is Already Registred.";
-                }else if ($manifacurer["username"] == $username) {
+                } else if ($manifacurer["username"] == $username) {
                     $message->message = "Username Is Already Registred.";
                 } else {
-                    $message->message = "Company Email Is Already Registred.";
+                    $message->message = "Email Is Already Registred.";
                 }
 
                 echo json_encode($message);

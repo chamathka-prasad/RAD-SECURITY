@@ -318,6 +318,7 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
                           <th scope="col">Name</th>
                           <th scope="col">Email</th>
                           <th scope="col">Username</th>
+                          <th scope="col">Status</th>
 
 
                         </thead>
@@ -514,6 +515,15 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
               if (element.img) {
                 imgpath = "../../resources/userImg/" + element.img;
               }
+
+              var act = "";
+              var deac = "";
+              if (element.u_status == "DEACTIVE") {
+                deac = "selected";
+              } else {
+                act = "selected"
+              }
+
               manuLoader.innerHTML = manuLoader.innerHTML +
                 `    <tr role="button" data-bs-toggle="modal" data-bs-target="#manuView${element.id}">
                           <th>${num}</th>
@@ -531,6 +541,7 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
                           <td>${element.name}</td>
                           <td>${element.email}</td>
                           <td>${element.username}</td>
+                          <td>${element.u_status}</td>
                          
 
                         </tr>
@@ -540,7 +551,7 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit Designer Details</h1>
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit Finance Details</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -591,6 +602,22 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
                                 </div>
                               </div>
                             </div>
+                            <hr/>
+                             
+                            <div class="col-12 col-lg-6">
+                              <div class="form-group row">
+                                <label
+                                  for="lname"
+                                  class="col-sm-3 text-start control-label col-form-label">Status<span class="text-danger">&#8727;</span></label>
+                                <div class="col-sm-9" >
+                                <select class="form-select" id="status${element.id}">
+                                <option value="ACTIVE" ${act}>ACTIVE</option>
+                                <option value="DEACTIVE" ${deac}>DEACTIVE</option>
+                                </select>
+                                </div>
+                              </div>
+                            </div>
+                            
                             <hr/>
                             <div class="col-12 col-lg-6">
                               <div class="form-group row">
@@ -742,6 +769,8 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
         var username = document.getElementById("uusername" + id);
         var password = document.getElementById("upassword" + id);
 
+        var status = document.getElementById("status" + id);
+
 
 
         var cimage = document.getElementById("uimage" + id);
@@ -784,6 +813,7 @@ if (isset($_SESSION["rb_user"]) && $_SESSION["rb_user"]["type"] == "finance_head
           formData.append("email", email.value);
           formData.append("username", username.value);
           formData.append("password", password.value);
+          formData.append("status", status.value);
           formData.append("cimg", cimage.files[0]);
 
           fetch("api/updatedesigner.php", {

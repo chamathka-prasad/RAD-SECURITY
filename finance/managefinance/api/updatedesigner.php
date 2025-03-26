@@ -39,6 +39,8 @@ if (isset($_SESSION["rb_user"])) {
     $username = $_POST["username"];
     $password = $_POST["password"];
 
+    $status = $_POST["status"];
+
 
     $regex = '/^\+?\d+$/';
     $message = new stdClass();
@@ -58,6 +60,10 @@ if (isset($_SESSION["rb_user"])) {
     } else if (empty($password)) {
         $message->type = "error";
         $message->message = "Password Is Empty";
+        echo json_encode($message);
+    } else if (empty($status)) {
+        $message->type = "error";
+        $message->message = "Status Is Empty";
         echo json_encode($message);
     } else {
 
@@ -83,8 +89,8 @@ if (isset($_SESSION["rb_user"])) {
                     $path = "../../../resources/userImg/" . $fileName . "." . $ext;
                     move_uploaded_file($img["tmp_name"], $path);
 
-                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`img`=?,`email`=?,`username`=? WHERE `id`=?
-                ", "sssssi", [$cname, $password, $savePath, $email, $username, $id]);
+                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`img`=?,`email`=?,`username`=?,`u_status`=? WHERE `id`=?
+                ", "ssssssi", [$cname, $password, $savePath, $email, $username,$status, $id]);
 
                     if ($insertManifacturer['affected_rows'] > 0) {
 
@@ -98,7 +104,7 @@ if (isset($_SESSION["rb_user"])) {
                         echo json_encode($message);
                     }
                 } else {
-                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`email`=?,`username`=? WHERE `id`=?", "ssssi", [$cname, $password, $email, $username, $id]);
+                    $insertManifacturer = $db->iud("UPDATE `user` SET `name`=?,`password`=?,`email`=?,`username`=?,`u_status`=? WHERE `id`=?", "sssssi", [$cname, $password, $email, $username,$status, $id]);
 
                     if ($insertManifacturer['affected_rows'] > 0) {
 

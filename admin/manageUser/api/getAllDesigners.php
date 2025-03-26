@@ -34,7 +34,7 @@ if (isset($_SESSION["rb_user"])) {
 
 $message = new stdClass();
 
-$sql = "SELECT `id`,`name`,`img`,`username`,`email`,`password`,`type` FROM `user`";
+$sql = "SELECT `id`,`name`,`img`,`username`,`email`,`password`,`type`,`u_status` FROM `user` WHERE `id`!='".$_SESSION["rb_user"]["id"]."'";
 $result = $db->search($sql);
 echo json_encode($result);
 
